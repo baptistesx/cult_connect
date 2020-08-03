@@ -1,0 +1,2 @@
+{"_id":{"$oid":"5ebec95f40f00636044d302d"},"modules":[{"$oid":"5e7a80125d33fe0d041ff8cb"}],"email":"toto@gmail.com","pwd":"871872670134933f1bc52cde8043cb429efcdab63266dda1cc27244ee107a505","__v":{"$numberInt":"2"}}
+{"_id":{"$oid":"5ecfccadde081d037ccf5e43"},"modules":[],"email":"tata@gmail.com","pwd":"bcffeb187ca9be9161a9d09088e72ceb7cba17846d7795335dd8d75fa3cd336f","__v":{"$numberInt":"0"}}

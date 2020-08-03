@@ -1,0 +1,3 @@
+{"_id":{"$oid":"5e826a32b50e94197c19442c"},"sensor":{"$oid":"5e81197a68819b45fce01000"},"values":[{"date":{"$date":{"$numberLong":"1585951200000"}},"value":{"$numberInt":"30"}},{"date":{"$date":{"$numberLong":"1583272800000"}},"value":{"$numberInt":"15"}},{"date":{"$date":{"$numberLong":"1578783600000"}},"value":"20"}]}
+{"_id":{"$oid":"5e826ad7b50e94197c19442f"},"sensor":{"$oid":"5e811ab968819b45fce01002"},"values":[{"date":{"$date":{"$numberLong":"1585951200000"}},"value":{"$numberInt":"60"}},{"date":{"$date":{"$numberLong":"1588543200000"}},"value":{"$numberInt":"75"}}]}
+{"_id":{"$oid":"5ebac38b4f542737f82bd4e9"},"sensor":{"$oid":"5ebac39c4f542737f82bd4ea"},"values":[{"date":{"$date":{"$numberLong":"1585864800000"}},"value":"25"}]}

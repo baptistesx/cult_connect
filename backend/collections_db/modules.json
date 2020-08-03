@@ -1,0 +1,3 @@
+{"_id":{"$oid":"5e7a80125d33fe0d041ff8cb"},"publicID":"1234","privateID":"1234","name":"MOD1","place":"PLACE1","used":true,"sensors":[{"$oid":"5e81197a68819b45fce01000"}],"actuators":[{"$oid":"5eccd985f2c975767e2fef83"},{"$oid":"5ece4b4b513af22be4fced9e"},{"$oid":"5ece4b53513af22be4fced9f"},{"$oid":"5ece4b55513af22be4fceda0"}],"user":{"$oid":"5ebec95f40f00636044d302d"}}
+{"_id":{"$oid":"5e7a88e55d33fe0d041ff8ce"},"publicID":"4567","privateID":"4567","name":"","place":"","used":false,"sensors":[{"$oid":"5e8858cf43322c38c4da3703"}]}
+{"_id":{"$oid":"5e80cbbce5765b1e5c22e696"},"publicID":"9874","privateID":"9874","name":"","place":"","used":false,"sensors":[]}

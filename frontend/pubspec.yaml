@@ -1,0 +1,72 @@
+name: cult_connect
+description: A sensors/actuators monitoring app
+
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Service locator
+  get_it: ^2.0.1
+  # Bloc for state management
+  flutter_bloc: ^5.0.1
+  # Value equality
+  equatable: ^0.4.0
+  # Functional programming thingies
+  dartz: ^0.8.6
+  # Remote API
+  connectivity: ^0.4.3+7
+  http: ^0.12.0+2
+  # Local cache
+  shared_preferences: ^0.5.3+4
+  # Swap the connectivity package for this
+  data_connection_checker: ^0.3.4
+
+  material_design_icons_flutter: 2.7.94
+
+  flutter_staggered_grid_view: "^0.2.7"
+
+  flutter_svg: ^0.17.4
+
+  flutter_launcher_icons: ^0.7.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mockito: ^4.1.0
+
+flutter_icons:
+  android: true
+  image_path_android: "assets/images/logo.png"
+  image_path_ios: "assets/images/logo.png"
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/idle.flr
+    - assets/images/
+
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/Roboto-Regular.ttf
+          weight: 300
+        - asset: assets/fonts/Roboto-Medium.ttf
+          weight: 400
+        - asset: assets/fonts/Roboto-Light.ttf
+          weight: 500
+        - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Roboto-Black.ttf
+          weight: 900
+    - family: Somatic
+      fonts:
+        - asset: assets/fonts/Somatic-Rounded.ttf
