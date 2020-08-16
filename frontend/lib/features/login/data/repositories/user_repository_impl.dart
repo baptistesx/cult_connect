@@ -4,10 +4,8 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/error/exception.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../core/network/network_info.dart';
-import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/user_repository.dart';
-import '../../domain/usecases/configure_wifi.dart';
 import '../datasources/user_local_data_source.dart';
 import '../datasources/user_remote_data_source.dart';
 
@@ -41,16 +39,10 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<Either<Failure, User>> configureWifi(WifiParams params) async {
+  Future<Either<Failure, User>> updatePassword(
+      String emailAddress, String newPassword) async {
     return await _requestUserAction(() {
-      return remoteDataSource.configureWifi(params);
-    });
-  }
-
-  @override
-  Future<Either<Failure, User>> updatePassword(NoParams params) async {
-    return await _requestUserAction(() {
-      return remoteDataSource.updatePassword(NoParams());
+      return remoteDataSource.updatePassword(emailAddress, newPassword);
     });
   }
 

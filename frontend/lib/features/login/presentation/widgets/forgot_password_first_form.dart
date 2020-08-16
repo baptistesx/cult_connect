@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:cult_connect/features/login/domain/usecases/sign_in.dart';
-// import 'package:cult_connect/features/login/domain/usecases/sign_in.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../domain/usecases/sign_in.dart';
 import '../bloc/bloc.dart';
 import 'loading_widget.dart';
 
@@ -12,13 +11,13 @@ class ForgotPasswordFirstForm extends StatelessWidget {
   final newPasswordController = TextEditingController();
   String emailAddress = "";
   String newPassword = "";
-  final _signupFormKey = GlobalKey<FormState>();
+  final _forgotPasswordFirstFormKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<LoginBloc, LoginState>(
       listener: (context, state) {
-        if (state is Error) {
+        if (state is LoginError) {
           final snackBar = SnackBar(
             duration: const Duration(seconds: 1),
             content: Row(children: [
@@ -30,16 +29,17 @@ class ForgotPasswordFirstForm extends StatelessWidget {
           );
           Scaffold.of(context).showSnackBar(snackBar);
         } else if (state is VerificationCodeLoaded) {
-          Navigator.of(context).pushNamed(
-            '/forgotPasswordSecondPage',
-            arguments:
+          Navigator.of(context)
+              .pushNamed('/forgotPasswordSecondPage', arguments: {
+            "loginParams":
                 LoginParams(emailAddress: emailAddress, password: newPassword),
-          );
+            "verificationCode": state.verificationCode,
+          });
         }
       },
       builder: (context, state) {
         return Form(
-          key: _signupFormKey,
+          key: _forgotPasswordFirstFormKey,
           child: Column(
             children: <Widget>[
               TextFormField(
@@ -89,7 +89,8 @@ class ForgotPasswordFirstForm extends StatelessWidget {
                       color: Colors.grey[200],
                       textTheme: ButtonTextTheme.primary,
                       onPressed: () {
-                        if (_signupFormKey.currentState.validate()) {
+                        if (_forgotPasswordFirstFormKey.currentState
+                            .validate()) {
                           dispatchSendVerificationCode(context);
                         }
                       },
@@ -100,7 +101,7 @@ class ForgotPasswordFirstForm extends StatelessWidget {
               SizedBox(height: 20),
               BlocBuilder<LoginBloc, LoginState>(
                 builder: (context, state) {
-                  if (state is Loading) {
+                  if (state is LoginLoading) {
                     return LoadingWidget(color: Theme.of(context).accentColor);
                   } else {
                     return Container();

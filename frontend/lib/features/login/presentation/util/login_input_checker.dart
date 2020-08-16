@@ -1,10 +1,9 @@
 import 'package:dartz/dartz.dart';
 
-import '../../domain/usecases/sign_in.dart';
-import '../../../../main.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../core/presentation/util/input_checker.dart';
+import '../../domain/usecases/sign_in.dart';
 
 class LoginInputChecker extends InputChecker {
   Either<Failure, LoginParams> signInCheck(LoginParams loginParams) {
@@ -47,8 +46,9 @@ class LoginInputChecker extends InputChecker {
     }
   }
 
-  Either<Failure, String> verificationCodeCheck(String verificationCode) {
-    if (verificationCode != globalUser.verificationCode) {
+  Either<Failure, String> verificationCodeCheck(
+      String verificationCode, String enteredCode) {
+    if (verificationCode != enteredCode) {
       return Left(VerificationCodeNotMatchingFailure());
     } else {
       return Right(verificationCode);

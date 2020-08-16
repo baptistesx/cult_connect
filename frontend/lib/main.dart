@@ -7,13 +7,11 @@ import 'route_generator.dart';
 UserModel globalUser = UserModel(
   userId: null,
   emailAddress: null,
-  token: null,
   modules: null,
   favouriteSensors: null,
   routerPassword: null,
   routerSsid: null,
-  newPassword: null,
-  verificationCode: null,
+  token: null,
 );
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

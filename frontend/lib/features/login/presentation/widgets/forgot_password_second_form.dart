@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-// import 'package:cult_connect/main.dart';
 
+import '../../domain/usecases/sign_in.dart';
 import '../bloc/bloc.dart';
 import 'loading_widget.dart';
 
 class ForgotPasswordSecondForm extends StatelessWidget {
-  String verificationCode = "";
-  final verificationCodeController = TextEditingController();
+  String enteredCode = "";
+  final enteredCodeController = TextEditingController();
   final _signupFormKey = GlobalKey<FormState>();
-  final data;
+  LoginParams loginParams;
+  String verificationCode;
 
-  ForgotPasswordSecondForm(this.data);
+  ForgotPasswordSecondForm(
+      @required this.loginParams, @required this.verificationCode)
+      : super();
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<LoginBloc, LoginState>(
       listener: (context, state) {
-        if (state is Error) {
+        if (state is LoginError) {
           final snackBar = SnackBar(
             duration: const Duration(seconds: 3),
             content: Row(children: [
@@ -32,7 +35,7 @@ class ForgotPasswordSecondForm extends StatelessWidget {
             backgroundColor: Colors.red[400],
           );
           Scaffold.of(context).showSnackBar(snackBar);
-        } else if (state is Loaded) {
+        } else if (state is LoginLoaded) {
           if (state.user.modules.isEmpty) {
             Navigator.of(context).pushNamed(
               '/tutorialPages',
@@ -44,6 +47,8 @@ class ForgotPasswordSecondForm extends StatelessWidget {
               arguments: null,
             );
           }
+        } else if (state is VerificationCodeLoaded) {
+          verificationCode = state.verificationCode;
         }
       },
       builder: (context, state) {
@@ -52,7 +57,7 @@ class ForgotPasswordSecondForm extends StatelessWidget {
           child: Column(
             children: <Widget>[
               TextFormField(
-                controller: verificationCodeController,
+                controller: enteredCodeController,
                 obscureText: true,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
@@ -61,7 +66,7 @@ class ForgotPasswordSecondForm extends StatelessWidget {
                   labelText: 'Verification code',
                 ),
                 onChanged: (code) {
-                  verificationCode = code;
+                  enteredCode = code;
                 },
                 validator: (String code) {
                   if (code.isEmpty)
@@ -82,7 +87,6 @@ class ForgotPasswordSecondForm extends StatelessWidget {
                       textColor: const Color(0xFFFFFFFF),
                       onPressed: () {
                         if (_signupFormKey.currentState.validate()) {
-                          print("update");
                           dispatchUpdatePassword(context);
                         }
                       },
@@ -113,7 +117,7 @@ class ForgotPasswordSecondForm extends StatelessWidget {
               SizedBox(height: 10),
               BlocBuilder<LoginBloc, LoginState>(
                 builder: (context, state) {
-                  if (state is Loading) {
+                  if (state is LoginLoading) {
                     return LoadingWidget(color: Theme.of(context).accentColor);
                   } else {
                     return Container();
@@ -129,11 +133,13 @@ class ForgotPasswordSecondForm extends StatelessWidget {
 
   void dispatchUpdatePassword(BuildContext context) {
     BlocProvider.of<LoginBloc>(context)
-        .add(LaunchUpdatePassword(verificationCode));
+        .add(LaunchUpdatePassword(verificationCode, enteredCode, loginParams));
   }
 
   void dispatchSendVerificationCode(BuildContext context) {
-    BlocProvider.of<LoginBloc>(context)
-        .add(LaunchSendVerificationCode(data.emailAddress, data.password));
+    BlocProvider.of<LoginBloc>(context).add(LaunchSendVerificationCode(
+      loginParams.emailAddress,
+      loginParams.password,
+    ));
   }
 }

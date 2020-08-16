@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 
-import '../../domain/usecases/configure_wifi.dart';
 import '../../domain/usecases/sign_in.dart';
 
 @immutable
@@ -21,12 +20,6 @@ class LaunchRegister extends LoginEvent {
   LaunchRegister(this.loginParams) : super([loginParams]);
 }
 
-class LaunchWifiConfiguration extends LoginEvent {
-  final WifiParams wifiParams;
-
-  LaunchWifiConfiguration(this.wifiParams) : super([wifiParams]);
-}
-
 class LaunchSendVerificationCode extends LoginEvent {
   final String emailAddress;
   final String newPassword;
@@ -36,7 +29,11 @@ class LaunchSendVerificationCode extends LoginEvent {
 }
 
 class LaunchUpdatePassword extends LoginEvent {
-  final String code;
+  final String verificationCode;
+  final String enteredCode;
+  final LoginParams loginParams;
 
-  LaunchUpdatePassword(this.code) : super([code]);
+  LaunchUpdatePassword(
+      this.verificationCode, this.enteredCode, this.loginParams)
+      : super([verificationCode, enteredCode, loginParams]);
 }

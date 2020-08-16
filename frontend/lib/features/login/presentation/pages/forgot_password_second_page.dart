@@ -3,13 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../injection_container.dart';
+import '../../domain/usecases/sign_in.dart';
 import '../bloc/bloc.dart';
 import '../widgets/forgot_password_second_form.dart';
 
 class ForgotPasswordSecondPage extends StatelessWidget {
-  dynamic data;
+  LoginParams loginParams;
+  String verificationCode;
 
-  ForgotPasswordSecondPage({Key key, this.data}) : super(key: key);
+  ForgotPasswordSecondPage({Key key, dynamic data})
+      : loginParams = data["loginParams"],
+        verificationCode = data["verificationCode"],
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +44,7 @@ class ForgotPasswordSecondPage extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 25),
-                  ForgotPasswordSecondForm(data),
+                  ForgotPasswordSecondForm(loginParams, verificationCode),
                 ],
               ),
             ),

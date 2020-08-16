@@ -1,19 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_blue/flutter_blue.dart';
 
 import '../../../login/presentation/widgets/loading_widget.dart';
 import '../../domain/usecases/add_module.dart';
+import '../../domain/usecases/configure_wifi.dart';
 import '../bloc/bloc.dart';
 
 class AddModuleForm extends StatelessWidget {
-  final publicIdController = TextEditingController();
+  String publicId;
+  BluetoothDevice device;
+
+  AddModuleForm({@required this.device}) : publicId = device.name.split('_')[1];
+
   final privateIdController = TextEditingController();
   final nameController = TextEditingController();
   final placeController = TextEditingController();
-  final _signupFormKey = GlobalKey<FormState>();
+  final _addModuleFormKey = GlobalKey<FormState>();
+
+  final routerSsidController = TextEditingController();
+  final routerPasswordController = TextEditingController();
+  final _routerFormKey = GlobalKey<FormState>();
+
+  WifiParams wifiParams = WifiParams(routerSsid: "", routerPassword: "");
 
   AddModuleParams addModuleParams = AddModuleParams(
-    token: '123',
     publicId: "",
     privateId: "",
     name: "",
@@ -23,7 +34,7 @@ class AddModuleForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ModuleBloc, ModuleState>(
-      listener: (context, state) {
+      listener: (context, state) async {
         if (state is Error) {
           final snackBar = SnackBar(
             content: Row(children: [
@@ -37,6 +48,7 @@ class AddModuleForm extends StatelessWidget {
           );
           Scaffold.of(context).showSnackBar(snackBar);
         } else if (state is Loaded) {
+          device.disconnect();
           Navigator.of(context).pushNamed(
             '/dashboardPage',
             arguments: null,
@@ -44,142 +56,245 @@ class AddModuleForm extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        return Form(
-          key: _signupFormKey,
-          child: Column(
-            children: <Widget>[
-              TextFormField(
-                controller: publicIdController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  errorStyle: TextStyle(
-                    color: Colors.red[400],
-                    fontSize: 16,
-                  ),
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.label_important),
-                  hintText: 'Public Id',
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-                onChanged: (value) {
-                  addModuleParams.publicId = value;
-                },
-                validator: (String publicId) {
-                  if (publicId.isEmpty) return EMPTY_PUBLIC_ID_FAILURE_MESSAGE;
-                  if (publicId.length != 3)
-                    return INVALID_PUBLIC_ID_FAILURE_MESSAGE;
-                  return null;
-                },
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                keyboardType: TextInputType.number,
-                controller: privateIdController,
-                decoration: InputDecoration(
-                  errorStyle: TextStyle(
-                    color: Colors.red[400],
-                    fontSize: 16,
-                  ),
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.label_important),
-                  hintText: 'Private Id',
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-                onChanged: (value) {
-                  addModuleParams.privateId = value;
-                },
-                validator: (String privateId) {
-                  if (privateId.isEmpty)
-                    return EMPTY_PRIVATE_ID_FAILURE_MESSAGE;
-                  if (privateId.length != 3)
-                    return INVALID_PRIVATE_ID_FAILURE_MESSAGE;
-                  return null;
-                },
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.label),
-                  hintText: 'NickName',
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-                onChanged: (value) {
-                  addModuleParams.name = value;
-                },
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: placeController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.place),
-                  hintText: 'Place',
-                  // labelText: 'Place',
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-                onChanged: (value) {
-                  addModuleParams.place = value;
-                },
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  FlatButton(
-                    onPressed: () {
-                      if (_signupFormKey.currentState.validate()) {
-                        dispatchAddModule(context);
-                      }
-                    },
-                    child: Row(
-                      children: <Widget>[
-                        Text(
-                          'Go',
+        if (!(state is Loaded)) {
+          return StreamBuilder<List<BluetoothService>>(
+              stream: device.services,
+              initialData: [],
+              builder: (c, snapshot) {
+                if (snapshot.data.isEmpty)
+                  return Text("Bluetooth connection error");
+
+                BluetoothService service =
+                    snapshot.data[snapshot.data.length - 1];
+                BluetoothCharacteristic characteristic =
+                    service.characteristics[0];
+
+                return Form(
+                  key: _addModuleFormKey,
+                  child: Column(
+                    children: <Widget>[
+                      TextFormField(
+                        controller: routerSsidController,
+                        decoration: InputDecoration(
+                          errorStyle: TextStyle(
+                            color: Colors.red[400],
+                            fontSize: 16,
+                          ),
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.label_important),
+                          hintText: 'SSID',
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
+                        onChanged: (value) {
+                          wifiParams.routerSsid = value;
+                        },
+                        validator: (String routerSsid) {
+                          if (routerSsid.isEmpty)
+                            return 'Please fill in the router ssid';
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 10),
+                      TextFormField(
+                        controller: routerPasswordController,
+                        decoration: InputDecoration(
+                          errorStyle: TextStyle(
+                            color: Colors.red[400],
+                            fontSize: 16,
+                          ),
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.lock),
+                          hintText: 'Password',
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
+                        onChanged: (value) {
+                          wifiParams.routerPassword = value;
+                        },
+                        validator: (String routerPassword) {
+                          if (routerPassword.isEmpty)
+                            return 'Please fill in the password';
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 30),
+                      Text(device.name,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 25,
+                          )),
+                      SizedBox(height: 10),
+                      TextFormField(
+                        keyboardType: TextInputType.number,
+                        controller: privateIdController,
+                        decoration: InputDecoration(
+                          errorStyle: TextStyle(
+                            color: Colors.red[400],
+                            fontSize: 16,
                           ),
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.label_important),
+                          hintText: 'Private Id',
+                          filled: true,
+                          fillColor: Colors.white,
                         ),
-                        Icon(
-                          Icons.keyboard_arrow_right,
-                          color: Colors.white,
-                          size: 60,
+                        onChanged: (value) {
+                          addModuleParams.privateId = value;
+                        },
+                        validator: (String privateId) {
+                          if (privateId.isEmpty)
+                            return EMPTY_PRIVATE_ID_FAILURE_MESSAGE;
+                          if (privateId.length != 3)
+                            return INVALID_PRIVATE_ID_FAILURE_MESSAGE;
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 10),
+                      TextFormField(
+                        controller: nameController,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.label),
+                          hintText: 'NickName',
+                          filled: true,
+                          fillColor: Colors.white,
                         ),
-                      ],
-                    ),
+                        onChanged: (value) {
+                          addModuleParams.name = value;
+                        },
+                      ),
+                      SizedBox(height: 10),
+                      TextFormField(
+                        controller: placeController,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.place),
+                          hintText: 'Place',
+                          // labelText: 'Place',
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
+                        onChanged: (value) {
+                          addModuleParams.place = value;
+                        },
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      BlocBuilder<ModuleBloc, ModuleState>(
+                        builder: (context, state) {
+                          print(state);
+                          if (state is Empty ||
+                              state == null ||
+                              state is Error) {
+                            return Row(
+                              children: [
+                                const Spacer(),
+                                FlatButton(
+                                  onPressed: () async {
+                                    if (_addModuleFormKey.currentState
+                                        .validate()) {
+                                      List<int> val2Send = _getIdsInListOfInt();
+
+                                      dispatchSendRouterIds2Module(
+                                          context, characteristic, val2Send);
+                                    }
+                                  },
+                                  child: Row(
+                                    children: <Widget>[
+                                      Text(
+                                        'Go',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 25,
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.keyboard_arrow_right,
+                                        color: Colors.white,
+                                        size: 60,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+                          if (state is Loading) {
+                            return Row(
+                              children: [
+                                const Spacer(),
+                                Expanded(
+                                    child: LoadingWidget(
+                                  color: Colors.white,
+                                )),
+                                FlatButton(
+                                  onPressed: () async {
+                                    if (_addModuleFormKey.currentState
+                                        .validate()) {
+                                      List<int> val2Send = _getIdsInListOfInt();
+
+                                      dispatchSendRouterIds2Module(
+                                          context, characteristic, val2Send);
+                                    }
+                                  },
+                                  child: Row(
+                                    children: <Widget>[
+                                      Text(
+                                        'Go',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 25,
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.keyboard_arrow_right,
+                                        color: Colors.white,
+                                        size: 60,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
+                          } else {
+                            return Container(
+                              width: 0.0,
+                              height: 0.0,
+                            );
+                          }
+                        },
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              BlocBuilder<ModuleBloc, ModuleState>(
-                builder: (context, state) {
-                  if (state is Loading) {
-                    return LoadingWidget(
-                      color: Colors.white,
-                    );
-                  } else {
-                    return Container(
-                      width: 0.0,
-                      height: 0.0,
-                    );
-                  }
-                },
-              ),
-            ],
-          ),
-        );
+                );
+              });
+        }
+        return Container();
       },
     );
   }
 
-  void dispatchAddModule(BuildContext context) {
-    BlocProvider.of<ModuleBloc>(context).add(LaunchAddModule(addModuleParams));
+  void dispatchSendRouterIds2Module(BuildContext context,
+      BluetoothCharacteristic characteristic, List<int> val2Send) {
+    addModuleParams.publicId = publicId;
+    BlocProvider.of<ModuleBloc>(context).add(
+        LaunchSendRouterIds2Module(characteristic, val2Send, addModuleParams));
+  }
+
+  List<int> _getIdsInListOfInt() {
+    List<int> valToSend = [];
+    for (int i = 0; i < wifiParams.routerSsid.length; i++) {
+      valToSend.add(wifiParams.routerSsid.codeUnitAt(i));
+    }
+
+    valToSend.add(';'.codeUnitAt(0));
+
+    for (int i = 0; i < wifiParams.routerPassword.length; i++) {
+      valToSend.add(wifiParams.routerPassword.codeUnitAt(i));
+    }
+
+    return valToSend;
   }
 }

@@ -8,12 +8,14 @@
             "name": "Dart: Run all Tests",
             "request": "launch",
             "type": "dart",
-            "program": "./test/"
+            "program": "./frontend/test/"
         },
         {
             "name": "Flutter",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "program": "./frontend/lib/main.dart"
+
         }
     ]
 }

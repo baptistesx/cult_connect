@@ -6,15 +6,13 @@ import 'package:flutter/foundation.dart';
 
 import './bloc.dart';
 import '../../../../core/error/failure.dart';
-import '../util/login_input_checker.dart';
-import '../../../../core/usecases/usecase.dart';
 import '../../../../main.dart';
 import '../../domain/entities/user.dart';
-import '../../domain/usecases/configure_wifi.dart';
 import '../../domain/usecases/register.dart';
 import '../../domain/usecases/send_verification_code.dart';
 import '../../domain/usecases/sign_in.dart';
 import '../../domain/usecases/update_password.dart';
+import '../util/login_input_checker.dart';
 
 const String SERVER_FAILURE_MESSAGE = 'Server Failure';
 const String CACHE_FAILURE_MESSAGE = 'Cache Failure';
@@ -34,7 +32,6 @@ const String VERIFICATION_CODE_NOT_MATCHING_FAILURE_MESSAGE =
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final SignIn signIn;
   final Register register;
-  final ConfigureWifi configureWifi;
   final SendVerificationCode sendVerificationCode;
   final UpdatePassword updatePassword;
   final LoginInputChecker inputChecker;
@@ -42,25 +39,22 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc({
     @required SignIn signIn,
     @required Register register,
-    @required ConfigureWifi configuration,
     @required SendVerificationCode verficiationCode,
     @required UpdatePassword updatePassword,
     @required LoginInputChecker checker,
   })  : assert(signIn != null),
         assert(register != null),
-        assert(configuration != null),
         assert(verficiationCode != null),
         assert(updatePassword != null),
         assert(checker != null),
         signIn = signIn,
         register = register,
-        configureWifi = configuration,
         sendVerificationCode = verficiationCode,
         updatePassword = updatePassword,
         inputChecker = checker,
         super(null);
 
-  LoginState get initialState => Empty();
+  LoginState get initialState => LoginEmpty();
 
   @override
   Stream<LoginState> mapEventToState(LoginEvent event) async* {
@@ -72,7 +66,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           yield* _streamFailure(failure);
         },
         (loginParams) async* {
-          yield Loading();
+          yield LoginLoading();
           final failureOrUser = await signIn(LoginParams(
             emailAddress: loginParams.emailAddress,
             password: loginParams.password,
@@ -88,7 +82,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           yield* _streamFailure(failure);
         },
         (loginParams) async* {
-          yield Loading();
+          yield LoginLoading();
           final failureOrUser = await register(LoginParams(
             emailAddress: loginParams.emailAddress,
             password: loginParams.password,
@@ -96,13 +90,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           yield* _eitherLoadedOrErrorState(failureOrUser);
         },
       );
-    } else if (event is LaunchWifiConfiguration) {
-      yield Loading();
-      final failureOrUser = await configureWifi(WifiParams(
-        routerSsid: event.wifiParams.routerSsid,
-        routerPassword: event.wifiParams.routerPassword,
-      ));
-      yield* _eitherLoadedOrErrorState(failureOrUser);
     } else if (event is LaunchSendVerificationCode) {
       final inputEither = inputChecker.passwordChecked(event.newPassword);
 
@@ -111,37 +98,36 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           yield* _streamFailure(failure);
         },
         (_) async* {
-          yield Loading();
+          yield LoginLoading();
           final verificationCode =
               await sendVerificationCode(event.emailAddress);
 
           yield* verificationCode.fold(
             (failure) async* {
-              yield Empty();
-              yield Error(
+              yield LoginEmpty();
+              yield LoginError(
                 message: _mapFailureToMessage(failure),
               );
             },
             (code) async* {
-              globalUser.emailAddress = event.emailAddress;
-              globalUser.verificationCode = code;
-              globalUser.newPassword = event.newPassword;
               yield VerificationCodeLoaded(verificationCode: code);
             },
           );
         },
       );
     } else if (event is LaunchUpdatePassword) {
-      final inputEither = inputChecker.verificationCodeCheck(event.code);
+      final inputEither = inputChecker.verificationCodeCheck(
+        event.verificationCode,
+        event.enteredCode,
+      );
 
       yield* inputEither.fold(
         (failure) async* {
-          print("failure");
           yield* _streamFailure(failure);
         },
         (_) async* {
-          yield Loading();
-          final failureOrUser = await updatePassword(NoParams());
+          yield LoginLoading();
+          final failureOrUser = await updatePassword(event.loginParams);
           yield* _eitherLoadedOrErrorState(failureOrUser);
         },
       );
@@ -149,17 +135,17 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   }
 
   Stream<LoginState> _streamFailure(Failure failure) async* {
-    yield Empty();
-    yield Error(message: _mapFailureToMessage(failure));
+    yield LoginEmpty();
+    yield LoginError(message: _mapFailureToMessage(failure));
   }
 
   Stream<LoginState> _eitherLoadedOrErrorState(
       Either<Failure, User> either) async* {
     yield either.fold(
-      (failure) => Error(message: _mapFailureToMessage(failure)),
+      (failure) => LoginError(message: _mapFailureToMessage(failure)),
       (user) {
         globalUser = user;
-        return Loaded(user: user);
+        return LoginLoaded(user: user);
       },
     );
   }

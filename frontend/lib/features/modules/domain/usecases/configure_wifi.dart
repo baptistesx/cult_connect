@@ -4,11 +4,11 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/error/failure.dart';
 import '../../../../core/usecases/usecase.dart';
-import '../entities/user.dart';
-import '../repositories/user_repository.dart';
+import '../../../login/domain/entities/user.dart';
+import '../repositories/modules_repository.dart';
 
 class ConfigureWifi implements UseCase<User, WifiParams> {
-  final UserRepository repository;
+  final ModulesRepository repository;
 
   ConfigureWifi(this.repository);
 

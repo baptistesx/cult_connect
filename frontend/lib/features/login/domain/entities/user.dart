@@ -6,8 +6,6 @@ import '../../../modules/domain/entities/module.dart';
 class User extends Equatable {
   String userId;
   String emailAddress;
-  String newPassword;
-  String verificationCode;
   String token;
   String routerSsid;
   String routerPassword;
@@ -17,8 +15,6 @@ class User extends Equatable {
   User({
     @required this.userId,
     @required this.emailAddress,
-    @required this.newPassword,
-    @required this.verificationCode,
     @required this.token,
     @required this.routerSsid,
     @required this.routerPassword,
@@ -28,6 +24,6 @@ class User extends Equatable {
 
   @override
   String toString() {
-    return 'User(userId: $userId, emailAddress: $emailAddress, newPassword: $newPassword, verificationCode: $verificationCode, token: $token, routerSsid: $routerSsid, routerPassword: $routerPassword, modules: $modules, favouriteSensors: $favouriteSensors)';
+    return 'User(userId: $userId, emailAddress: $emailAddress, token: $token, routerSsid: $routerSsid, routerPassword: $routerPassword, modules: $modules, favouriteSensors: $favouriteSensors)';
   }
 }

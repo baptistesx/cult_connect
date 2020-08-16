@@ -20,7 +20,6 @@ class _TutorialPagesState extends State<TutorialPages> {
     TutorialFirstPage(),
     TutorialSecondPage(),
     TutorialThirdPage(),
-    WifiConfigurationPage(),
   ];
 
   static const _kDuration = const Duration(milliseconds: 300);

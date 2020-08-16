@@ -22,3 +22,9 @@ class Error extends ModuleState {
 
   Error({@required this.message}) : super([message]);
 }
+
+class RouterIdsError extends ModuleState {
+  final String message;
+
+  RouterIdsError({@required this.message}) : super([message]);
+}

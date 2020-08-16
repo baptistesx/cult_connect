@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:cult_connect/features/modules/data/models/module_model.dart';
-import 'package:cult_connect/features/modules/domain/entities/sensor.dart';
-import 'package:cult_connect/core/error/exception.dart';
-import 'package:cult_connect/features/modules/domain/entities/module.dart';
 
-// import 'package:cult_connect/core/error/exception.dart';
-// import 'package:cult_connect/features/login/data/models/user_model.dart';
-// import 'package:cult_connect/features/modules/data/models/module_model.dart';
-// import 'package:cult_connect/features/modules/domain/entities/module.dart';
-// import 'package:cult_connect/features/modules/domain/entities/sensor.dart';
-
+import '../../../../core/error/exception.dart';
 import '../../../../injection_container.dart';
 import '../../../../main.dart';
+import '../../../login/presentation/widgets/widgets.dart';
+import '../../data/models/module_model.dart';
+import '../../domain/entities/module.dart';
+import '../../domain/entities/sensor.dart';
 import '../bloc/bloc.dart';
 
 class DashboardPage extends StatelessWidget {
@@ -43,8 +38,7 @@ class DashboardPage extends StatelessWidget {
                           " - " +
                           globalUser.modules[index].place),
                       IconButton(
-                        onPressed: () {
-                        },
+                        onPressed: () {},
                         icon: Icon(Icons.settings),
                         color: Colors.grey,
                       ),
@@ -105,7 +99,12 @@ class DashboardPage extends StatelessWidget {
                                                 ),
                                                 IconButton(
                                                   icon: Icon(Icons.favorite),
-                                                  onPressed: () {},
+                                                  onPressed: () {
+                                                    print(sensor.sensorId);
+                                                    dispatchRemoveFavouriteSensorById(
+                                                        context,
+                                                        sensor.sensorId);
+                                                  },
                                                 ),
                                               ],
                                             ),
@@ -168,9 +167,11 @@ class DashboardPage extends StatelessWidget {
                         }
                         if (state is Empty) {
                           return Text('ookok');
-                        } else if (state is Loading)
-                          return Text('loading');
-                        else if (state is Loaded)
+                        } else if (state is Loading) {
+                          return LoadingWidget(
+                            color: Colors.black,
+                          );
+                        } else if (state is Loaded)
                           return Text('Loading');
                         else
                           return Text('kkkoo');
@@ -193,6 +194,11 @@ class DashboardPage extends StatelessWidget {
         fontSize: 30,
       ),
     );
+  }
+
+  void dispatchRemoveFavouriteSensorById(BuildContext context, sensorId) {
+    BlocProvider.of<ModuleBloc>(context)
+        .add(LaunchRemoveFavouriteSensorById(sensorId));
   }
 }
 

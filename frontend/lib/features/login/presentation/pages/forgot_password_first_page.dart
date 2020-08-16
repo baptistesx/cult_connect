@@ -21,22 +21,28 @@ class ForgotPasswordFirstPage extends StatelessWidget {
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
-                SizedBox(height: 10),
-                Row(children: [
-                  IconButton(
-                    iconSize: 45,
-                    icon: Icon(
-                      Icons.keyboard_arrow_left,
-                      color: Colors.black,
+                SizedBox(height: 20),
+                Row(crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: IconButton(
+                        iconSize: 45,
+                        icon: Icon(
+                          Icons.keyboard_arrow_left,
+                          color: Colors.black,
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
                     ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                ]),
-                Image.asset(
-                  'assets/images/logo.png',
-                  scale: 1.4,
+                    const Spacer(),
+                    Image.asset(
+                      'assets/images/logo.png',
+                      scale: 1.4,
+                    ),
+                    const Spacer(flex: 2)
+                  ],
                 ),
                 Image.asset(
                   'assets/images/logo_nom_fonce.png',

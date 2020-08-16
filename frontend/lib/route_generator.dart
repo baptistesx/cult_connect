@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'features/login/presentation/pages/pages.dart';
 import 'features/login/presentation/pages/tutorial_pages.dart';
-import 'features/modules/presentation/pages/add_first_module_page.dart';
+import 'features/modules/presentation/pages/bluetooth_device_page.dart';
+import 'features/modules/presentation/pages/bluetooth_find_devices_page.dart';
+import 'features/modules/presentation/pages/bluetooth_off_page.dart';
+import 'features/modules/presentation/pages/bluetooth_page.dart';
 import 'features/modules/presentation/pages/dashboard_page.dart';
 
 class RouteGenerator {
@@ -43,16 +46,28 @@ class RouteGenerator {
             data: args,
           ),
         );
-      case '/wifiConfiguration':
+      case '/bluetoothPage':
         return MaterialPageRoute(
-          builder: (_) => WifiConfigurationPage(
+          builder: (_) => BluetoothPage(
             data: args,
           ),
         );
-      case '/addFirstModulePage':
+      case '/bluetoothFindDevicesPage':
         return MaterialPageRoute(
-          builder: (_) => AddFirstModulePage(
+          builder: (_) => BluetoothFindDevicesPage(
             data: args,
+          ),
+        );
+      case '/bluetoothOffPage':
+        return MaterialPageRoute(
+          builder: (_) => BluetoothOffPage(
+            state: args,
+          ),
+        );
+      case '/bluetoothDevicePage':
+        return MaterialPageRoute(
+          builder: (_) => DeviceScreen(
+            device: args,
           ),
         );
       case '/dashboardPage':

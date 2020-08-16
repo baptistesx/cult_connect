@@ -8,14 +8,14 @@ abstract class LoginState extends Equatable {
   LoginState([List props = const <dynamic>[]]) : super(props);
 }
 
-class Empty extends LoginState {}
+class LoginEmpty extends LoginState {}
 
-class Loading extends LoginState {}
+class LoginLoading extends LoginState {}
 
-class Loaded extends LoginState {
+class LoginLoaded extends LoginState {
   final User user;
 
-  Loaded({@required this.user}) : super([user]);
+  LoginLoaded({@required this.user}) : super([user]);
 }
 
 class VerificationCodeLoaded extends LoginState {
@@ -25,8 +25,8 @@ class VerificationCodeLoaded extends LoginState {
       : super([verificationCode]);
 }
 
-class Error extends LoginState {
+class LoginError extends LoginState {
   final String message;
 
-  Error({@required this.message}) : super([message]);
+  LoginError({@required this.message}) : super([message]);
 }

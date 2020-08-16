@@ -31,6 +31,25 @@ class TutorialThirdPage extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
+              Row(mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  IconButton(
+                    iconSize: 60,
+                    alignment: Alignment(-10.0, -10.0),
+                    tooltip: "test",
+                    icon: Icon(
+                      Icons.keyboard_arrow_right,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pushNamed(
+                        '/bluetoothPage',
+                        arguments: null,
+                      );
+                    },
+                  ),
+                ],
+              ),
             ],
           ),
         ),

@@ -5,17 +5,13 @@ import 'package:http/http.dart' as http;
 
 import '../../../../core/error/exception.dart';
 import '../../../../core/network/network_info.dart';
-import '../../../../core/usecases/usecase.dart';
-import '../../../../main.dart';
-import '../../domain/usecases/configure_wifi.dart';
 import '../models/user_model.dart';
 
 abstract class UserRemoteDataSource {
   Future<UserModel> signIn(String emailAddress, String password);
   Future<UserModel> register(String emailAddress, String password);
-  Future<UserModel> configureWifi(WifiParams params);
   Future<String> sendVerificationCode(String emailAddress);
-  Future<UserModel> updatePassword(NoParams params);
+  Future<UserModel> updatePassword(String emailAddress, String password);
 }
 
 class UserRemoteDataSourceImpl implements UserRemoteDataSource {
@@ -44,22 +40,12 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       );
 
   @override
-  Future<UserModel> configureWifi(WifiParams params) =>
-      _requestUserFromUrlAndBody(
-        '/api/configureWifi',
-        {
-          'routerSsid': params.routerSsid,
-          'routerPassword': params.routerPassword,
-        },
-      );
-
-  @override
-  Future<UserModel> updatePassword(NoParams params) =>
+  Future<UserModel> updatePassword(String emailAddress, String newPassword) =>
       _requestUserFromUrlAndBody(
         '/api/updatePassword',
         {
-          'email': globalUser.emailAddress,
-          'newPassword': globalUser.newPassword,
+          'email': emailAddress,
+          'newPassword': newPassword,
         },
       );
 

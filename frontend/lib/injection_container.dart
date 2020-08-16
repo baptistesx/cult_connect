@@ -8,7 +8,6 @@ import 'features/login/data/datasources/user_local_data_source.dart';
 import 'features/login/data/datasources/user_remote_data_source.dart';
 import 'features/login/data/repositories/user_repository_impl.dart';
 import 'features/login/domain/repositories/user_repository.dart';
-import 'features/login/domain/usecases/configure_wifi.dart';
 import 'features/login/domain/usecases/register.dart';
 import 'features/login/domain/usecases/send_verification_code.dart';
 import 'features/login/domain/usecases/sign_in.dart';
@@ -19,7 +18,9 @@ import 'features/modules/data/datasources/modules_remote_data_source.dart';
 import 'features/modules/data/repositories/modules_repository_impl.dart';
 import 'features/modules/domain/repositories/modules_repository.dart';
 import 'features/modules/domain/usecases/add_module.dart';
+import 'features/modules/domain/usecases/configure_wifi.dart';
 import 'features/modules/domain/usecases/get_modules.dart';
+import 'features/modules/domain/usecases/remove_favourite_sensor_by_id.dart';
 import 'features/modules/presentation/bloc/bloc.dart';
 import 'features/modules/presentation/util/modules_input_checker.dart';
 
@@ -47,7 +48,6 @@ Future<void> initLoginDI() async {
       signIn: sl(),
       register: sl(),
       checker: sl(),
-      configuration: sl(),
       verficiationCode: sl(),
       updatePassword: sl(),
     ),
@@ -56,7 +56,6 @@ Future<void> initLoginDI() async {
   // Use cases
   sl.registerLazySingleton(() => SignIn(sl()));
   sl.registerLazySingleton(() => Register(sl()));
-  sl.registerLazySingleton(() => ConfigureWifi(sl()));
   sl.registerLazySingleton(() => SendVerificationCode(sl()));
   sl.registerLazySingleton(() => UpdatePassword(sl()));
 
@@ -86,6 +85,8 @@ Future<void> initModulesDI() async {
     () => ModuleBloc(
       addModule: sl(),
       getModules: sl(),
+      configuration: sl(),
+      removeFavouriteSensorById: sl(),
       inputChecker: sl(),
     ),
   );
@@ -93,6 +94,8 @@ Future<void> initModulesDI() async {
   // Use cases
   sl.registerLazySingleton(() => AddModule(sl()));
   sl.registerLazySingleton(() => GetModules(sl()));
+  sl.registerLazySingleton(() => RemoveFavouriteSensorById(sl()));
+  sl.registerLazySingleton(() => ConfigureWifi(sl()));
 
   // Repository
   sl.registerLazySingleton<ModulesRepository>(() => ModulesRepositoryImpl(

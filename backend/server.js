@@ -44,9 +44,13 @@ app.post("/api/signup", function (req, res) {
   var email = req.body.email;
   var password = req.body.pwd;
 
-  mongo.register(email, password, function (code, answer) {
-    res.status(code).send(answer);
-  });
+  mongo.register(
+    email,
+    password,
+    function (code, answer) {
+      res.status(code).send(answer);
+    },
+  );
 });
 
 //Route pour connexion de l'utilisateur
@@ -355,7 +359,7 @@ app.post("/api/signIn", function (req, res) {
         "privateId": "1234",
         "name": "module1",
         "place": "serre",
-        "used": false,
+        "used": true,
         "sensors": {
           "147": {
             "sensorId": "147",
@@ -370,7 +374,7 @@ app.post("/api/signIn", function (req, res) {
             "limitMin": 0,
             "limitMax": 100,
             "automaticMode": false,
-            "isFavourite": false,
+            "isFavourite": true,
             "data": [{
               "date": "2020-04-03T22:00:00.000+00:00",
               "value": 65
@@ -390,7 +394,7 @@ app.post("/api/signIn", function (req, res) {
             "limitMin": 0,
             "limitMax": 100,
             "automaticMode": false,
-            "isFavourite": false,
+            "isFavourite": true,
             "data": [{
               "date": "2020-04-03T22:00:00.000+00:00",
               "value": 30
@@ -439,8 +443,8 @@ app.post("/api/configureWifi", function (req, res) {
       "userId": "123",
       "emailAddress": "toto@gmail.com",
       "token": "123456",
-      "routerSsid": "aaa",
-      "routerPassword": "bbb",
+      "routerSsid": routerSsid,
+      "routerPassword": routerPassword,
       "modules": [],
       "favouriteSensors": [],
 
@@ -455,7 +459,7 @@ app.post("/api/sendVerificationCode", function (req, res) {
     console.log(emailAddress);
     //TODO: envoie code par email
     res.status(200).send(JSON.stringify({
-      "verificationCode": "567",
+      "verificationCode": "123",
     }));
   }, 2000);
 });
@@ -480,7 +484,7 @@ app.post("/api/updatePassword", function (req, res) {
         "privateId": "1234",
         "name": "module1",
         "place": "serre",
-        "used": false,
+        "used": true,
         "sensors": {
           "147": {
             "sensorId": "147",
@@ -602,6 +606,77 @@ app.post("/api/addModule", function (req, res) {
     }));
   }, 2000);
 });
+
+app.post("/api/removeFavouriteSensorById", function (req, res) {
+  console.log("new request: /api/removeFavouriteSensorById");
+  setTimeout(function () {
+    var jwt = req.headers.authorization;
+    var sensorId = req.body.sensorId;
+    console.log(jwt)
+    console.log(sensorId)
+    res.status(200).send(JSON.stringify({
+      "userId": "123",
+      "emailAddress": "toto@gmail.com",
+      "token": "123456",
+      "routerSsid": "aaa",
+      "routerPassword": "bbb",
+      "modules": [{
+        "moduleId": "123",
+        "publicId": "1234",
+        "privateId": "1234",
+        "name": "module1",
+        "place": "serre",
+        "used": true,
+        "sensors": {
+          "147": {
+            "sensorId": "147",
+            "name": "sensor1",
+            "dataType": "humidity",
+            "unit": "%",
+            "acceptableMin": 20,
+            "acceptableMax": 30,
+            "criticalMin": 10,
+            "criticalMax": 40,
+            "nominalValue": 25,
+            "limitMin": 0,
+            "limitMax": 100,
+            "automaticMode": false,
+            "isFavourite": false,
+            "data": [{
+              "date": "2020-04-03T22:00:00.000+00:00",
+              "value": 65
+            }],
+            "actuators": [],
+          },
+          "10": {
+            "sensorId": "10",
+            "name": "sensor2",
+            "dataType": "temperature",
+            "unit": "°C",
+            "acceptableMin": 20,
+            "acceptableMax": 30,
+            "criticalMin": 10,
+            "criticalMax": 40,
+            "nominalValue": 25,
+            "limitMin": 0,
+            "limitMax": 100,
+            "automaticMode": false,
+            "isFavourite": true,
+            "data": [{
+              "date": "2020-04-03T22:00:00.000+00:00",
+              "value": 30
+            }],
+            "actuators": [],
+          },
+        },
+        "actuators": [],
+      }],
+      "favouriteSensors": ["10"],
+
+    }));
+  }, 3000);
+});
+
 
 // Démarrage du serveur
 http.createServer(app).listen(process.env.PORT || 8081, function () {

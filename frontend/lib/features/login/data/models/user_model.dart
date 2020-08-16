@@ -9,8 +9,6 @@ class UserModel extends User {
   UserModel({
     @required String userId,
     @required String emailAddress,
-    @required String newPassword,
-    @required String verificationCode,
     @required String token,
     @required String routerSsid,
     @required String routerPassword,
@@ -19,8 +17,6 @@ class UserModel extends User {
   }) : super(
           userId: userId,
           emailAddress: emailAddress,
-          newPassword: newPassword,
-          verificationCode: verificationCode,
           token: token,
           routerSsid: routerSsid,
           routerPassword: routerPassword,
@@ -32,8 +28,6 @@ class UserModel extends User {
     return UserModel(
       userId: json['userId'],
       emailAddress: json['emailAddress'],
-      newPassword: "",
-      verificationCode: "",
       token: json['token'],
       routerSsid: json['routerSsid'],
       routerPassword: json['routerPassword'],
@@ -55,8 +49,6 @@ class UserModel extends User {
       'userId': userId,
       'emailAddress': emailAddress,
       'token': token,
-      'newPassword': newPassword,
-      'verificationCode': verificationCode,
       'routerSsid': routerSsid,
       'routerPassword': routerPassword,
       'modules': modules,

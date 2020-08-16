@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
 
-import '../../domain/usecases/add_module.dart';
 import '../../../../core/error/exception.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../core/presentation/util/input_checker.dart';
+import '../../domain/usecases/add_module.dart';
 
 class ModulesInputChecker extends InputChecker {
   Either<Failure, AddModuleParams> addModuleCheck(

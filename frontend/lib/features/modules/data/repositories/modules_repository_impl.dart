@@ -4,11 +4,15 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/error/exception.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../core/network/network_info.dart';
+import '../../../login/data/models/user_model.dart';
 import '../../../login/domain/entities/user.dart';
 import '../../domain/entities/module.dart';
 import '../../domain/repositories/modules_repository.dart';
 import '../../domain/usecases/add_module.dart';
+import '../../domain/usecases/configure_wifi.dart';
 import '../datasources/modules_remote_data_source.dart';
+
+typedef Future<User> _RequestUserActionChooser();
 
 class ModulesRepositoryImpl implements ModulesRepository {
   final ModulesRemoteDataSource remoteDataSource;
@@ -35,9 +39,32 @@ class ModulesRepositoryImpl implements ModulesRepository {
 
   @override
   Future<Either<Failure, User>> addModule(AddModuleParams params) async {
+    return await _requestUserAction(() {
+      return remoteDataSource.addModule(params);
+    });
+  }
+
+  @override
+  Future<Either<Failure, UserModel>> removeFavouriteSensorById(
+      String sensorId) async {
+    return await _requestUserAction(() {
+      return remoteDataSource.removeFavouriteSensorById(sensorId);
+    });
+  }
+
+  @override
+  Future<Either<Failure, User>> configureWifi(WifiParams params) async {
+    return await _requestUserAction(() {
+      return remoteDataSource.configureWifi(params);
+    });
+  }
+
+  Future<Either<Failure, User>> _requestUserAction(
+    _RequestUserActionChooser requestUserAction,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
-        final remoteUser = await remoteDataSource.addModule(params);
+        final remoteUser = await requestUserAction();
         return Right(remoteUser);
       } on ServerException {
         return Left(ServerFailure());
