@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
+import '../../../../main.dart';
 import '../../domain/usecases/sign_in.dart';
 import '../bloc/bloc.dart';
 import 'loading_widget.dart';
@@ -36,7 +37,7 @@ class ForgotPasswordSecondForm extends StatelessWidget {
           );
           Scaffold.of(context).showSnackBar(snackBar);
         } else if (state is LoginLoaded) {
-          if (state.user.modules.isEmpty) {
+          if (globalUser.modules.isEmpty) {
             Navigator.of(context).pushNamed(
               '/tutorialPages',
               arguments: null,

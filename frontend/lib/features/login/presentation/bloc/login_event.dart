@@ -8,10 +8,18 @@ abstract class LoginEvent extends Equatable {
   LoginEvent([List props = const <dynamic>[]]) : super(props);
 }
 
+class LaunchAutoSignIn extends LoginEvent {
+  LaunchAutoSignIn() : super([]);
+}
+
 class LaunchSignIn extends LoginEvent {
   final LoginParams loginParams;
 
   LaunchSignIn(this.loginParams) : super([loginParams]);
+}
+
+class LaunchSignOut extends LoginEvent {
+  LaunchSignOut() : super([]);
 }
 
 class LaunchRegister extends LoginEvent {

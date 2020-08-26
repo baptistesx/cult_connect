@@ -9,7 +9,6 @@ class UserModel extends User {
   UserModel({
     @required String userId,
     @required String emailAddress,
-    @required String token,
     @required String routerSsid,
     @required String routerPassword,
     @required List<ModuleModel> modules,
@@ -17,7 +16,6 @@ class UserModel extends User {
   }) : super(
           userId: userId,
           emailAddress: emailAddress,
-          token: token,
           routerSsid: routerSsid,
           routerPassword: routerPassword,
           modules: modules,
@@ -28,7 +26,6 @@ class UserModel extends User {
     return UserModel(
       userId: json['userId'],
       emailAddress: json['emailAddress'],
-      token: json['token'],
       routerSsid: json['routerSsid'],
       routerPassword: json['routerPassword'],
       modules: json['modules'] != []
@@ -48,11 +45,19 @@ class UserModel extends User {
     return {
       'userId': userId,
       'emailAddress': emailAddress,
-      'token': token,
       'routerSsid': routerSsid,
       'routerPassword': routerPassword,
       'modules': modules,
       'favouriteSensors': jsonEncode(favouriteSensors),
     };
+  }
+
+  User clearUser() {
+    userId = "";
+    emailAddress = "";
+    routerSsid = "";
+    routerPassword = "";
+    modules = List();
+    favouriteSensors = List();
   }
 }

@@ -36,44 +36,10 @@ class DeviceScreen extends StatelessWidget {
                 final state = snapshot.data;
                 if (state == BluetoothState.on && wasConnectedBefore == false) {
                   wasConnectedBefore = true;
-                  return SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 20, 12, 0),
-                      child: Column(
-                        children: <Widget>[
-                          Row(
-                            children: [
-                              Expanded(
-                                child: IconButton(
-                                  iconSize: 45,
-                                  icon: Icon(
-                                    Icons.keyboard_arrow_left,
-                                    color: Colors.white,
-                                  ),
-                                  onPressed: () async {
-                                    await device.disconnect();
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                              ),
-                              const Spacer(),
-                              Text("Router IDs",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 25,
-                                  ),
-                                  textAlign: TextAlign.center),
-                              const Spacer(flex: 2)
-                            ],
-                          ),
-                          AddModuleForm(device: device),
-                        ],
-                      ),
-                    ),
-                  );
+                  return AddModuleForm(device: device);
                 } else if (state == BluetoothState.on &&
                     wasConnectedBefore == true) {
-                      device.disconnect();
+                  device.disconnect();
                   Navigator.pop(context);
                   return Container();
                 }

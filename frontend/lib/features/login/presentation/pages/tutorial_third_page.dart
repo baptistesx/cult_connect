@@ -31,7 +31,8 @@ class TutorialThirdPage extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              Row(mainAxisAlignment: MainAxisAlignment.end,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   IconButton(
                     iconSize: 60,

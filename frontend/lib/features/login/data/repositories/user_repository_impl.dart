@@ -23,19 +23,42 @@ class UserRepositoryImpl implements UserRepository {
   });
 
   @override
-  Future<Either<Failure, User>> signIn(
+  Future<Either<Failure, String>> getJWT(
       String emailAddress, String password) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final jwt = await remoteDataSource.getJWT(emailAddress, password);
+        // localDataSource.cacheUser(remoteUser);
+        return Right(jwt);
+      } on ServerException {
+        return Left(ServerFailure());
+      }
+    } else {
+      return Left(OfflineFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, User>> signIn(String jwt) async {
     return await _requestUserAction(() {
-      return remoteDataSource.signIn(emailAddress, password);
+      return remoteDataSource.signIn(jwt);
     });
   }
 
   @override
-  Future<Either<Failure, User>> register(
+  Future<Either<Failure, String>> register(
       String emailAddress, String password) async {
-    return await _requestUserAction(() {
-      return remoteDataSource.register(emailAddress, password);
-    });
+    if (await networkInfo.isConnected) {
+      try {
+        final jwt = await remoteDataSource.register(emailAddress, password);
+        // localDataSource.cacheUser(remoteUser);
+        return Right(jwt);
+      } on ServerException {
+        return Left(ServerFailure());
+      }
+    } else {
+      return Left(OfflineFailure());
+    }
   }
 
   @override

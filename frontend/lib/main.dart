@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'features/login/data/models/user_model.dart';
 import 'injection_container.dart' as di;
 import 'route_generator.dart';
+
+final storage = FlutterSecureStorage();
 
 UserModel globalUser = UserModel(
   userId: null,
@@ -11,13 +14,26 @@ UserModel globalUser = UserModel(
   favouriteSensors: null,
   routerPassword: null,
   routerSsid: null,
-  token: null,
 );
+
+String jwt;
+
+Future<String> get jwtOrEmpty async {
+  //TODO: To uncomment to keep always connected once connected
+  // var jwt =
+  //     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRvdG9AZ21haWwuY29tIiwiaWF0IjoxNTkxOTY5ODcwLCJleHAiOjE1OTMyNjU4NzB9.4Y6ew9gnbAdbq-9C01CKnkbl8uDstJ4MlKlNu-pawn4";
+  var jwt = await storage.read(key: "jwt");
+  if (jwt == null) return "";
+  return jwt;
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await di.initGlobal();
   await di.initLoginDI();
   await di.initModulesDI();
+  jwt = await jwtOrEmpty;
+  print("jwt:$jwt");
   runApp(MyApp());
 }
 
@@ -62,7 +78,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       initialRoute: '/',
-      onGenerateRoute: RouteGenerator.generateRoute,
+      onGenerateRoute: RouteGenerator().generateRoute,
       debugShowCheckedModeBanner: false,
     );
   }

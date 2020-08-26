@@ -4,10 +4,12 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/network/network_info.dart';
+import 'core/network/socket_service.dart';
 import 'features/login/data/datasources/user_local_data_source.dart';
 import 'features/login/data/datasources/user_remote_data_source.dart';
 import 'features/login/data/repositories/user_repository_impl.dart';
 import 'features/login/domain/repositories/user_repository.dart';
+import 'features/login/domain/usecases/get_jwt.dart';
 import 'features/login/domain/usecases/register.dart';
 import 'features/login/domain/usecases/send_verification_code.dart';
 import 'features/login/domain/usecases/sign_in.dart';
@@ -17,10 +19,13 @@ import 'features/login/presentation/util/login_input_checker.dart';
 import 'features/modules/data/datasources/modules_remote_data_source.dart';
 import 'features/modules/data/repositories/modules_repository_impl.dart';
 import 'features/modules/domain/repositories/modules_repository.dart';
+import 'features/modules/domain/usecases/add_favourite_sensor_by_id.dart';
 import 'features/modules/domain/usecases/add_module.dart';
 import 'features/modules/domain/usecases/configure_wifi.dart';
 import 'features/modules/domain/usecases/get_modules.dart';
 import 'features/modules/domain/usecases/remove_favourite_sensor_by_id.dart';
+import 'features/modules/domain/usecases/update_module_settings.dart';
+import 'features/modules/domain/usecases/update_sensor_settings.dart';
 import 'features/modules/presentation/bloc/bloc.dart';
 import 'features/modules/presentation/util/modules_input_checker.dart';
 
@@ -36,6 +41,7 @@ Future<void> initGlobal() async {
   sl.registerLazySingleton(() => sharedPreferences);
   sl.registerLazySingleton(() => http.Client());
   sl.registerLazySingleton(() => DataConnectionChecker());
+  sl.registerLazySingleton(() => SocketService());
 }
 
 //! Features - Login
@@ -45,6 +51,7 @@ Future<void> initLoginDI() async {
 //Bloc
   sl.registerFactory(
     () => LoginBloc(
+      getJWT: sl(),
       signIn: sl(),
       register: sl(),
       checker: sl(),
@@ -54,6 +61,7 @@ Future<void> initLoginDI() async {
   );
 
   // Use cases
+  sl.registerLazySingleton(() => GetJWT(sl()));
   sl.registerLazySingleton(() => SignIn(sl()));
   sl.registerLazySingleton(() => Register(sl()));
   sl.registerLazySingleton(() => SendVerificationCode(sl()));
@@ -87,7 +95,10 @@ Future<void> initModulesDI() async {
       getModules: sl(),
       configuration: sl(),
       removeFavouriteSensorById: sl(),
+      addFavouriteSensorById: sl(),
       inputChecker: sl(),
+      updateSensorSettings: sl(),
+      updateModuleSettings: sl(),
     ),
   );
 
@@ -95,7 +106,10 @@ Future<void> initModulesDI() async {
   sl.registerLazySingleton(() => AddModule(sl()));
   sl.registerLazySingleton(() => GetModules(sl()));
   sl.registerLazySingleton(() => RemoveFavouriteSensorById(sl()));
+  sl.registerLazySingleton(() => AddFavouriteSensorById(sl()));
   sl.registerLazySingleton(() => ConfigureWifi(sl()));
+  sl.registerLazySingleton(() => UpdateSensorSettings(sl()));
+  sl.registerLazySingleton(() => UpdateModuleSettings(sl()));
 
   // Repository
   sl.registerLazySingleton<ModulesRepository>(() => ModulesRepositoryImpl(

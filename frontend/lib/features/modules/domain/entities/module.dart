@@ -30,3 +30,15 @@ class Module extends Equatable {
     return 'Module(moduleId: $moduleId, publicId: $publicId, privateId: $privateId, name: $name, place: $place, used: $used, sensors: $sensors, actuators: $actuators)';
   }
 }
+
+class UpdateModuleParams {
+  String moduleId;
+  String newName;
+  String newPlace;
+
+  UpdateModuleParams({
+    @required this.moduleId,
+    @required this.newName,
+    @required this.newPlace,
+  });
+}

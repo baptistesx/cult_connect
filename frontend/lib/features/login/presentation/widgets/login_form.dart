@@ -15,34 +15,7 @@ class LoginForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<LoginBloc, LoginState>(
-      listener: (context, state) {
-        if (state is LoginError) {
-          final snackBar = SnackBar(
-            duration: const Duration(seconds: 1),
-            content: Row(children: [
-              Icon(Icons.warning),
-              SizedBox(
-                width: 10,
-              ),
-              Text(state.message),
-            ]),
-            backgroundColor: Colors.red[400],
-          );
-          Scaffold.of(context).showSnackBar(snackBar);
-        } else if (state is LoginLoaded) {
-          if (state.user.modules.isEmpty) {
-            Navigator.of(context).pushNamed(
-              '/tutorialPages',
-              arguments: null,
-            );
-          } else {
-            Navigator.of(context).pushNamed(
-              '/dashboardPage',
-              arguments: null,
-            );
-          }
-        }
-      },
+      listener: (context, state) async {},
       builder: (context, state) {
         return Form(
           key: _signupFormKey,
@@ -59,6 +32,11 @@ class LoginForm extends StatelessWidget {
                 onChanged: (value) {
                   loginParams.emailAddress = value;
                 },
+                onFieldSubmitted: (value) {
+                  if (_signupFormKey.currentState.validate()) {
+                    dispatchSignIn(context);
+                  }
+                },
                 validator: (String emailAddress) {
                   if (emailAddress.isEmpty) return EMPTY_EMAIL_FAILURE_MESSAGE;
                   if (!RegExp(EMAIL_REGEX).hasMatch(emailAddress))
@@ -70,7 +48,6 @@ class LoginForm extends StatelessWidget {
               TextFormField(
                 controller: passwordController,
                 obscureText: true,
-                // keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.lock),
@@ -79,6 +56,11 @@ class LoginForm extends StatelessWidget {
                 ),
                 onChanged: (value) {
                   loginParams.password = value;
+                },
+                onFieldSubmitted: (value) {
+                  if (_signupFormKey.currentState.validate()) {
+                    dispatchSignIn(context);
+                  }
                 },
                 validator: (String password) {
                   if (password.isEmpty) return EMPTY_PASSWORD_FAILURE_MESSAGE;
@@ -155,6 +137,10 @@ class LoginForm extends StatelessWidget {
         );
       },
     );
+  }
+
+  void dispatchAutoSignIn(BuildContext context) {
+    BlocProvider.of<LoginBloc>(context).add(LaunchAutoSignIn());
   }
 
   void dispatchSignIn(BuildContext context) {

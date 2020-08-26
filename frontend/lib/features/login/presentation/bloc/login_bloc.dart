@@ -8,6 +8,7 @@ import './bloc.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../main.dart';
 import '../../domain/entities/user.dart';
+import '../../domain/usecases/get_jwt.dart';
 import '../../domain/usecases/register.dart';
 import '../../domain/usecases/send_verification_code.dart';
 import '../../domain/usecases/sign_in.dart';
@@ -30,6 +31,7 @@ const String VERIFICATION_CODE_NOT_MATCHING_FAILURE_MESSAGE =
     'The code does not match with the one we sent you';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
+  final GetJWT getJWT;
   final SignIn signIn;
   final Register register;
   final SendVerificationCode sendVerificationCode;
@@ -37,16 +39,19 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final LoginInputChecker inputChecker;
 
   LoginBloc({
+    @required GetJWT getJWT,
     @required SignIn signIn,
     @required Register register,
     @required SendVerificationCode verficiationCode,
     @required UpdatePassword updatePassword,
     @required LoginInputChecker checker,
-  })  : assert(signIn != null),
+  })  : assert(getJWT != null),
+        assert(signIn != null),
         assert(register != null),
         assert(verficiationCode != null),
         assert(updatePassword != null),
         assert(checker != null),
+        getJWT = getJWT,
         signIn = signIn,
         register = register,
         sendVerificationCode = verficiationCode,
@@ -58,7 +63,18 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   @override
   Stream<LoginState> mapEventToState(LoginEvent event) async* {
-    if (event is LaunchSignIn) {
+    if (event is LaunchAutoSignIn) {
+      yield LoginLoading();
+
+      final failureOrUser = await signIn(jwt);
+      yield failureOrUser.fold(
+        (failure) => LoginEmpty(),
+        (user) {
+          globalUser = user;
+          return LoginLoaded();
+        },
+      );
+    } else if (event is LaunchSignIn) {
       final inputEither = inputChecker.signInCheck(event.loginParams);
 
       yield* inputEither.fold(
@@ -67,13 +83,30 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         },
         (loginParams) async* {
           yield LoginLoading();
-          final failureOrUser = await signIn(LoginParams(
+
+          final failureOrJWT = await getJWT(LoginParams(
             emailAddress: loginParams.emailAddress,
             password: loginParams.password,
           ));
-          yield* _eitherLoadedOrErrorState(failureOrUser);
+          yield* failureOrJWT.fold(
+            (failure) async* {
+              yield* _streamFailure(failure);
+            },
+            (jwtReceived) async* {
+              jwt = jwtReceived;
+              storage.write(key: "jwt", value: jwt);
+
+              final failureOrUser = await signIn(jwt);
+              yield* _eitherLoadedOrErrorState(failureOrUser);
+            },
+          );
         },
       );
+    } else if (event is LaunchSignOut) {
+      globalUser.clearUser();
+      storage.write(key: "jwt", value: "");
+      jwt = "";
+      yield LoginEmpty();
     } else if (event is LaunchRegister) {
       final inputEither = inputChecker.registerCheck(event.loginParams);
 
@@ -83,11 +116,21 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         },
         (loginParams) async* {
           yield LoginLoading();
-          final failureOrUser = await register(LoginParams(
+
+          final failureOrJWT = await register(LoginParams(
             emailAddress: loginParams.emailAddress,
             password: loginParams.password,
           ));
-          yield* _eitherLoadedOrErrorState(failureOrUser);
+          yield* failureOrJWT.fold(
+            (failure) async* {
+              yield* _streamFailure(failure);
+            },
+            (jwt) async* {
+              storage.write(key: "jwt", value: jwt);
+              final failureOrUser = await signIn(jwt);
+              yield* _eitherLoadedOrErrorState(failureOrUser);
+            },
+          );
         },
       );
     } else if (event is LaunchSendVerificationCode) {
@@ -145,7 +188,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       (failure) => LoginError(message: _mapFailureToMessage(failure)),
       (user) {
         globalUser = user;
-        return LoginLoaded(user: user);
+        return LoginLoaded();
       },
     );
   }

@@ -4,12 +4,13 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/error/exception.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../core/network/network_info.dart';
-import '../../../login/data/models/user_model.dart';
 import '../../../login/domain/entities/user.dart';
 import '../../domain/entities/module.dart';
 import '../../domain/repositories/modules_repository.dart';
 import '../../domain/usecases/add_module.dart';
 import '../../domain/usecases/configure_wifi.dart';
+import '../../presentation/pages/dashboard_first_page.dart';
+import '../../presentation/pages/sensor_datails_page.dart';
 import '../datasources/modules_remote_data_source.dart';
 
 typedef Future<User> _RequestUserActionChooser();
@@ -45,7 +46,7 @@ class ModulesRepositoryImpl implements ModulesRepository {
   }
 
   @override
-  Future<Either<Failure, UserModel>> removeFavouriteSensorById(
+  Future<Either<Failure, User>> removeFavouriteSensorById(
       String sensorId) async {
     return await _requestUserAction(() {
       return remoteDataSource.removeFavouriteSensorById(sensorId);
@@ -72,5 +73,28 @@ class ModulesRepositoryImpl implements ModulesRepository {
     } else {
       return Left(OfflineFailure());
     }
+  }
+
+  @override
+  Future<Either<Failure, User>> addFavouriteSensorById(String sensorId) async {
+    return await _requestUserAction(() {
+      return remoteDataSource.addFavouriteSensorById(sensorId);
+    });
+  }
+
+  @override
+  Future<Either<Failure, User>> updateSensorSettings(
+      UpdateSensorParams params) async {
+    return await _requestUserAction(() {
+      return remoteDataSource.updateSensorSettings(params);
+    });
+  }
+
+  @override
+  Future<Either<Failure, User>> updateModuleSettings(
+      UpdateModuleParams params) async {
+    return await _requestUserAction(() {
+      return remoteDataSource.updateModuleSettings(params);
+    });
   }
 }

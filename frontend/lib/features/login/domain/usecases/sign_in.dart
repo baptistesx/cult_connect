@@ -7,17 +7,14 @@ import '../../../../core/usecases/usecase.dart';
 import '../entities/user.dart';
 import '../repositories/user_repository.dart';
 
-class SignIn implements UseCase<User, LoginParams> {
+class SignIn implements UseCase<User, String> {
   final UserRepository repository;
 
   SignIn(this.repository);
 
   @override
-  Future<Either<Failure, User>> call(LoginParams loginParams) async {
-    return await repository.signIn(
-      loginParams.emailAddress,
-      loginParams.password,
-    );
+  Future<Either<Failure, User>> call(String jwt) async {
+    return await repository.signIn(jwt);
   }
 }
 

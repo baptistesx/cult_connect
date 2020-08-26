@@ -28,3 +28,13 @@ class RouterIdsError extends ModuleState {
 
   RouterIdsError({@required this.message}) : super([message]);
 }
+
+class SensorDetailsDisplayed extends ModuleState {
+  final bool showSettings;
+
+  SensorDetailsDisplayed({@required this.showSettings}) : super([showSettings]);
+}
+
+class LoadingWhileUpdatingModule extends ModuleState {
+  LoadingWhileUpdatingModule() : super([]);
+}

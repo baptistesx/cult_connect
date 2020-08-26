@@ -22,7 +22,8 @@ class ForgotPasswordFirstPage extends StatelessWidget {
             child: Column(
               children: <Widget>[
                 SizedBox(height: 20),
-                Row(crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: IconButton(

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+  </head>
+  <body>
+    <form id="test" action="" method="get" class="form-example">
+      <div class="form-example">
+        <label for="name">moduleId: </label>
+        <input id="moduleId" type="text" name="name" id="name" required />
+      </div><div class="form-example">
+        <label for="name">sensorId: </label>
+        <input type="text" name="name" id="name" required />
+      </div><div class="form-example">
+        <label for="name">value: </label>
+        <input type="text" name="name" id="name" required />
+      </div>
+      <div class="form-example">
+        <input type="submit" value="Subscribe!" />
+      </div>
+    </form>
+    <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="test.js"></script>
+  </body>
+</html>
