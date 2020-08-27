@@ -5,7 +5,10 @@ var Schema = mongoose.Schema,
 const usersSchema = new Schema({
   email: String,
   pwd: String,
-  modules: [{type: ObjectId, ref: 'modules'}],
+  modules: [{type: ObjectId, ref: 'modules',}],
+  routerSsid: String,
+  routerPassword: String,
+  favouriteSensors: [String],
 });
 
 module.exports.users = mongoose.model("users", usersSchema);

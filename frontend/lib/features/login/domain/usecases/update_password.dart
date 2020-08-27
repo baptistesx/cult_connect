@@ -6,13 +6,13 @@ import '../entities/user.dart';
 import '../repositories/user_repository.dart';
 import 'sign_in.dart';
 
-class UpdatePassword implements UseCase<User, LoginParams> {
+class UpdatePassword implements UseCase<String, LoginParams> {
   final UserRepository repository;
 
   UpdatePassword(this.repository);
 
   @override
-  Future<Either<Failure, User>> call(LoginParams loginParams) async {
+  Future<Either<Failure, String>> call(LoginParams loginParams) async {
     return await repository.updatePassword(
         loginParams.emailAddress, loginParams.password);
   }

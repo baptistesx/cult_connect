@@ -42,8 +42,9 @@ class SensorModel extends Sensor {
         );
 
   factory SensorModel.fromJson(Map<String, dynamic> json) {
+    print(json['data']);
     return SensorModel(
-      sensorId: json['sensorId'],
+      sensorId: json['_id'],
       name: json['name'],
       dataType: json['dataType'],
       unit: json['unit'],

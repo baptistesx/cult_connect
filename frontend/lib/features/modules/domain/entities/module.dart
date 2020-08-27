@@ -11,7 +11,7 @@ class Module extends Equatable {
   String name;
   String place;
   bool used;
-  Map<String, Sensor> sensors;
+  List<Sensor> sensors;
   List<Actuator> actuators;
 
   Module({

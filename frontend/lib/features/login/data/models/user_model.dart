@@ -7,14 +7,12 @@ import '../../domain/entities/user.dart';
 
 class UserModel extends User {
   UserModel({
-    @required String userId,
     @required String emailAddress,
     @required String routerSsid,
     @required String routerPassword,
     @required List<ModuleModel> modules,
     @required List favouriteSensors,
   }) : super(
-          userId: userId,
           emailAddress: emailAddress,
           routerSsid: routerSsid,
           routerPassword: routerPassword,
@@ -24,8 +22,7 @@ class UserModel extends User {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      userId: json['userId'],
-      emailAddress: json['emailAddress'],
+      emailAddress: json['email'],
       routerSsid: json['routerSsid'],
       routerPassword: json['routerPassword'],
       modules: json['modules'] != []
@@ -43,7 +40,6 @@ class UserModel extends User {
     List<Map> modules =
         this.modules.map((module) => (module as ModuleModel).toJson()).toList();
     return {
-      'userId': userId,
       'emailAddress': emailAddress,
       'routerSsid': routerSsid,
       'routerPassword': routerPassword,
@@ -53,7 +49,6 @@ class UserModel extends User {
   }
 
   User clearUser() {
-    userId = "";
     emailAddress = "";
     routerSsid = "";
     routerPassword = "";

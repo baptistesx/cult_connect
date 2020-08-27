@@ -8,7 +8,7 @@ abstract class UserRepository {
   Future<Either<Failure, User>> signIn(String jwt);
   Future<Either<Failure, String>> register(
       String emailAddress, String password);
-  Future<Either<Failure, User>> updatePassword(
+  Future<Either<Failure, String>> updatePassword(
       String emailAddress, String password);
   Future<Either<Failure, String>> sendVerificationCode(String emailAddress);
 }

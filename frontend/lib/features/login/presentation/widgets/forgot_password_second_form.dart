@@ -44,7 +44,7 @@ class ForgotPasswordSecondForm extends StatelessWidget {
             );
           } else {
             Navigator.of(context).pushNamed(
-              '/dashboardPage',
+              '/dashboardPages',
               arguments: null,
             );
           }
@@ -72,7 +72,7 @@ class ForgotPasswordSecondForm extends StatelessWidget {
                 validator: (String code) {
                   if (code.isEmpty)
                     return EMPTY_VERIFICATION_CODE_FAILURE_MESSAGE;
-                  if (code.length != 3)
+                  if (code.length != 5)
                     return INVALID_VERIFICATION_CODE_FAILURE_MESSAGE;
                   return null;
                 },

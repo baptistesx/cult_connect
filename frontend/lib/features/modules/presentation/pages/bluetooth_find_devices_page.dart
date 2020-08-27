@@ -78,7 +78,7 @@ class BluetoothFindDevicesPage extends StatelessWidget {
                     builder: (c, snapshot) {
                       bool isEmpty = true;
                       for (ScanResult result in snapshot.data) {
-                        if (result.device.name.split('_')[0] == 'MODULE') {
+                        if (result.device.name.split('_')[0] == 'M') {
                           isEmpty = false;
                           break;
                         }
@@ -95,7 +95,7 @@ class BluetoothFindDevicesPage extends StatelessWidget {
                       }
                       return Column(
                         children: snapshot.data.map((r) {
-                          if (r.device.name.split('_')[0] != 'MODULE')
+                          if (r.device.name.split('_')[0] != 'M')
                             return Container();
                           return ScanResultTile(
                             result: r,

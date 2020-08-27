@@ -87,6 +87,8 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
             privateId: addModuleParams.privateId,
             name: addModuleParams.name,
             place: addModuleParams.place,
+            routerSsid: addModuleParams.routerSsid,
+            routerPassword: addModuleParams.routerPassword,
           ));
           yield* _eitherLoadedOrErrorState(failureOrUser);
         },

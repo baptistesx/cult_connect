@@ -9,7 +9,14 @@ const modulesSchema = new Schema({
   place: String,
   used: Boolean,
   sensors: [{ type: ObjectId, ref: "sensors" }],
-  user: { type: ObjectId, ref: "users" },
+  actuators: [{
+    type: ObjectId,
+    ref: "actuators"
+  }],
+  user: {
+    type: ObjectId,
+    ref: "users"
+  },
 });
 
 module.exports.modules = mongoose.model("modules", modulesSchema);

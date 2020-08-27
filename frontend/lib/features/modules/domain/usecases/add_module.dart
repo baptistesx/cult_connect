@@ -23,12 +23,16 @@ class AddModuleParams extends Equatable {
   String privateId;
   String name;
   String place;
+  String routerSsid;
+  String routerPassword;
 
   AddModuleParams({
     @required this.publicId,
     @required this.privateId,
     @required this.name,
     @required this.place,
+    @required this.routerSsid,
+    @required this.routerPassword,
   }) : super([
           publicId,
           privateId,
@@ -36,6 +40,6 @@ class AddModuleParams extends Equatable {
 
   @override
   String toString() {
-    return 'AddModuleParams(publicId: $publicId, privateId: $privateId, name: $name, place: $place)';
+    return 'AddModuleParams(publicId: $publicId, privateId: $privateId, name: $name, place: $place, routerSsid: $routerSsid, routerPassword: $routerPassword)';
   }
 }

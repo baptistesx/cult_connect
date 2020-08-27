@@ -55,6 +55,8 @@ class ModulesRemoteDataSourceImpl implements ModulesRemoteDataSource {
           'privateId': params.privateId,
           'name': params.name,
           'place': params.place,
+          'routerSsid': params.routerSsid,
+          'routerPassword': params.routerPassword
         },
       );
 
@@ -83,8 +85,9 @@ class ModulesRemoteDataSourceImpl implements ModulesRemoteDataSource {
           'Authorization': jwt
         },
         body: body);
+        print(body);
     print(response.body);
-    if (response.statusCode == 200) {
+    if (response.statusCode.toString()[0] == "2") {
       return UserModel.fromJson(json.decode(response.body));
     } else {
       throw ServerException();

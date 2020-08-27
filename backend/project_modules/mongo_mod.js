@@ -32,47 +32,52 @@ encryptPwd = function (pwd, callback) {
 
 //Vérification des conditions et association d'un module à un utilisateur
 module.exports.addModule = function (
-  email,
+  user,
   moduleName,
   modulePlace,
-  publicID,
-  privateID,
+  publicId,
+  privateId,
   callback
 ) {
-  controler.userExists(email, function (res, user) {
-    //Vérification de l'existence du module (les deux ID doivent matcher)
-    controler.moduleExists(res, publicID, privateID, function (res, module) {
-      //On vérifie si l'utilisateur n'a pas déjà ajouté ce module
-      controler.userOwnsThisModule(res, user, module, function (res) {
-        //On vérifie si le module est associé à un autre utilisateur
-        controler.isModuleUsed(res, module, function (res) {
-          //Cas 2: module disponible
-          console.log(
-            "le module d'id: '" +
-            publicID +
-            "' n'est pas deja utilisé => liaison avec le user"
-          );
-          // S'il n'y a tjrs pas de message d'erreur
-          if (res == null) {
-            module.name = moduleName
-            module.place = modulePlace
-            module.used = true
-            module.user = user._id // liaison de l'utilisateur au module
-            user.modules.push(module._id) // liaison du module à l'utilisateur
-            module.save(function (err) {
+  //Vérification de l'existence du module (les deux ID doivent matcher)
+  controler.moduleExists(publicId, privateId, function (res, module) {
+    //On vérifie si l'utilisateur n'a pas déjà ajouté ce module
+    controler.userOwnsThisModule(res, user, module, function (res) {
+      //On vérifie si le module est associé à un autre utilisateur
+      controler.isModuleUsed(res, module, function (res) {
+        //Cas 2: module disponible
+        console.log(
+          "le module d'id: '" +
+          publicId +
+          "' n'est pas deja utilisé => liaison avec le user"
+        );
+        // S'il n'y a tjrs pas de message d'erreur
+        if (res == null) {
+          module.name = moduleName
+          module.place = modulePlace
+          module.used = true
+          module.user = user._id // liaison de l'utilisateur au module
+          user.modules.push(module._id) // liaison du module à l'utilisateur
+          module.save(function (err, module) {
+            if (err) return handleError(err);
+
+            user.save(function (err, user) {
               if (err) return handleError(err);
+
+              getUserFullPopulated(user._id, function (code, user) {
+                console.log("après ajout")
+                console.log(user)
+                callback(201, user);
+              })
             })
-            user.save(function (err) {
-              if (err) return handleError(err);
-            })
-            callback("The module has been added with success!", 201);
-          } else {
-            callback("Error while adding the module : " + res, 401);
-          }
-        });
+          })
+        } else {
+          callback(401, "Error while adding the module : " + res);
+        }
       });
     });
-  })
+  });
+
 
 };
 
@@ -95,7 +100,10 @@ module.exports.register = function (email, password, callback) {
           //Le password est encrypté
           encryptPwd(password, function (encPassword) {
             createUser(email, encPassword, function (answer) {
-              callback(201, answer);
+              getJWT(email, password, function (code, answer) {
+                console.log(answer)
+                callback(201, answer);
+              });
             });
           });
         }
@@ -106,6 +114,28 @@ module.exports.register = function (email, password, callback) {
     callback(409, "Bad email format");
   }
 };
+
+module.exports.updatePassword = function (emailAddress, newPassword, callback) {
+  users.findOne({
+      email: emailAddress,
+    },
+    function (err, user) {
+      if (user != null) {
+        encryptPwd(newPassword, function (encPassword) {
+          user.pwd = encPassword;
+          user.save(function (err, user) {
+            getJWT(emailAddress, newPassword, function (code, answer) {
+              console.log(answer)
+              callback(200, answer);
+            });
+          });
+        });
+      } else {
+        callback(409, "No account with this email");
+      }
+    }
+  );
+}
 
 //Inscription d'un utilisateur
 createUser = function (email, encPassword, callback) {
@@ -122,7 +152,49 @@ createUser = function (email, encPassword, callback) {
 };
 
 //Vérification et connexion de l'utilisateur (renvoie un JWT)
-module.exports.logUser = function (email, password, callback) {
+module.exports.logUser = function (email, callback) {
+  //Le password est encrypté
+  // encryptPwd(password, function (encPassword) {
+  //Recherche d'un utilisateur qui match l'email et le password encrypté
+  users.findOne(
+      //TODO: utiliser findOne?
+      {
+        email: email,
+      },
+    ).populate({
+      //Remplace l'ObjectId du champ "modules" de user par l'objet correpsondant
+      path: "modules",
+      model: "modules",
+      // select: "modules",
+      //Remplace l'ObjectId du champ "sensors" du module peuplé précédemment par l'objet correpsondant
+      populate: [{
+          path: "sensors",
+          model: "sensors",
+          populate: [{
+            path: "actuators",
+            model: "actuators",
+            options: {
+              limit: 0
+            },
+          }],
+        },
+        {
+          path: "actuators",
+          model: "actuators",
+        }, "publicId"
+      ],
+    })
+    .exec(function (err, user) {
+      if (err) return handleError(err);
+      if (user != null) {
+        callback(200, user);
+      } else callback(500, "Bad token")
+    });
+  // );
+};
+
+//Vérification et génération d'un jwt lors de la connexion
+getJWT = function (email, password, callback) {
   //Le password est encrypté
   encryptPwd(password, function (encPassword) {
     //Recherche d'un utilisateur qui match l'email et le password encrypté
@@ -135,7 +207,6 @@ module.exports.logUser = function (email, password, callback) {
       function (err, user) {
         if (user != null) {
           //L'utilisateur existe bien
-
           var payload = {
             email: email,
           };
@@ -146,7 +217,9 @@ module.exports.logUser = function (email, password, callback) {
             expiresIn: "15d",
           });
 
-          callback(200, token);
+          callback(200, {
+            jwt: token
+          });
         } else {
           callback(401, "There's no user matching that");
         }
@@ -154,6 +227,119 @@ module.exports.logUser = function (email, password, callback) {
     );
   });
 };
+module.exports.getJWT = getJWT
+
+module.exports.removeFavouriteSensorById = function (user, sensorId, callback) {
+  for (var i = 0; i < user.favouriteSensors.length; i++) {
+    if (user.favouriteSensors[i] === sensorId) {
+      user.favouriteSensors.splice(i, 1);
+    }
+  }
+
+  user.save(function () {
+    console.log(sensorId)
+    sensors.updateOne({
+      _id: sensorId
+    }, {
+      $set: {
+        isFavourite: false
+      }
+    }, function (err, sensor) {
+      users.findOne({
+          _id: user._id
+        }, function (err, user) {
+
+        }).populate({
+          //Remplace l'ObjectId du champ "modules" de user par l'objet correpsondant
+          path: "modules",
+          model: "modules",
+          //Remplace l'ObjectId du champ "sensors" du module peuplé précédemment par l'objet correpsondant
+          populate: [{
+              path: "sensors",
+              model: "sensors",
+              populate: [{
+                path: "actuators",
+                model: "actuators",
+                options: {
+                  limit: 0
+                },
+              }, ],
+            },
+            {
+              path: "actuators",
+              model: "actuators",
+            },
+          ],
+        })
+        .exec(function (err, user) {
+
+          if (err) {
+            return handleError(err);
+          }
+          callback(200, user);
+        });
+    })
+  })
+
+}
+
+module.exports.setWifiRouterParameters = function (user, routerSsid, routerPassword, callback) {
+  user.routerSsid = routerSsid
+  user.routerPassword = routerPassword
+  user.save(function () {
+    callback(200, user);
+  })
+}
+
+module.exports.addFavouriteSensorById = function (user, sensorId, callback) {
+  user.favouriteSensors.push(sensorId)
+
+  user.save(function () {
+    console.log(sensorId)
+    sensors.updateOne({
+      _id: sensorId
+    }, {
+      $set: {
+        isFavourite: true
+      }
+    }, function (err, sensor) {
+      users.findOne({
+          _id: user._id
+        }, function (err, user) {
+
+        }).populate({
+          //Remplace l'ObjectId du champ "modules" de user par l'objet correpsondant
+          path: "modules",
+          model: "modules",
+          //Remplace l'ObjectId du champ "sensors" du module peuplé précédemment par l'objet correpsondant
+          populate: [{
+              path: "sensors",
+              model: "sensors",
+              populate: [{
+                path: "actuators",
+                model: "actuators",
+                options: {
+                  limit: 0
+                },
+              }, ],
+            },
+            {
+              path: "actuators",
+              model: "actuators",
+            },
+          ],
+        })
+        .exec(function (err, user) {
+
+          if (err) {
+            return handleError(err);
+          }
+          callback(200, user);
+        });
+    })
+  })
+
+}
 
 //Mise à jour du nom du module d'id reçu en paramètre
 module.exports.updateModuleName = function (id, newName, callback) { //update géneral : updateField?
@@ -165,7 +351,7 @@ module.exports.updateModuleName = function (id, newName, callback) { //update g�
         name: newName,
       },
     }, function (err, res) { // test res
-      callback(200, "ok");
+      callback(200);
     });
 };
 
@@ -179,12 +365,12 @@ module.exports.updateModulePlace = function (id, newPlace, callback) {
         place: newPlace,
       },
     }, function () {
-      callback(200, "ok");
+      callback(200);
     });
 };
 
 //Mise à jour du nom du capteur d'id reçu en paramètre
-module.exports.updateSensor = function (id, newName, callback) {
+module.exports.updateSensorSettings = function (id, newName, callback) {
   sensors
     .updateOne({
       _id: id
@@ -194,10 +380,43 @@ module.exports.updateSensor = function (id, newName, callback) {
       },
     })
     .then((obj) => {
-      callback(200, "ok");
+      callback(200);
     });
 };
 
+getUserFullPopulated = function (userId, callback) {
+  users.findOne({
+      _id: userId
+    }, ).populate({
+      //Remplace l'ObjectId du champ "modules" de user par l'objet correpsondant
+      path: "modules",
+      model: "modules",
+      //Remplace l'ObjectId du champ "sensors" du module peuplé précédemment par l'objet correpsondant
+      populate: [{
+          path: "sensors",
+          model: "sensors",
+          populate: [{
+            path: "actuators",
+            model: "actuators",
+            options: {
+              limit: 0
+            },
+          }, ],
+        },
+        {
+          path: "actuators",
+          model: "actuators",
+        },
+      ],
+    })
+    .exec(function (err, user) {
+      if (err) {
+        return handleError(err);
+      }
+      callback(200, user);
+    });
+}
+module.exports.getUserFullPopulated = getUserFullPopulated
 //Mise à jour de l'état de l'actionneur d'id recu en paramètre
 //avec la valeur value reçue en paramètre
 module.exports.setActuatorState = function (id, value, callback) {
@@ -228,6 +447,14 @@ module.exports.setActuatorAutomaticMode = function (id, value, callback) {
       callback(200, "Success");
     });
 };
+
+module.exports.getModuleOwnerById = function (moduleId, callback) {
+  users.findOne({
+    modules: moduleId
+  }, function (err, user) {
+    callback(user)
+  })
+}
 
 module.exports.getModules = function (email, callback) {
   var o = {}; // empty Object

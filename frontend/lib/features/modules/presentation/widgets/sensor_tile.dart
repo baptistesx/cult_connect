@@ -1,21 +1,24 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+
 import 'package:cult_connect/features/modules/domain/entities/module.dart';
 import 'package:cult_connect/features/modules/domain/entities/sensor.dart';
 import 'package:cult_connect/features/modules/presentation/bloc/bloc.dart';
 import 'package:cult_connect/features/modules/presentation/pages/dashboard_pages.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class SensorTile extends StatelessWidget {
   final Sensor sensor;
   final Module module;
   final int moduleIndex;
+  final int sensorIndex;
 
   SensorTile({
     Key key,
     @required this.sensor,
     @required this.module,
     @required this.moduleIndex,
+    @required this.sensorIndex,
   }) : super(key: key);
 
   @override
@@ -29,18 +32,25 @@ class SensorTile extends StatelessWidget {
       ),
       title: Row(
         children: <Widget>[
-          Text(
-            '${sensor.name}: ',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          Flexible(
+                      child: Text(
+              '${sensor.name}',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              // overflow: TextOverflow.fade,
+              softWrap: true,
+            ),
           ),
-          Text(
-            '${module.place}',
-            style: TextStyle(fontSize: 20),
-          ),
+          // Text(
+          //   '${module.place}',
+          //   style: TextStyle(fontSize: 20),
+          // ),
         ],
       ),
       subtitle: Text(
-        sensor.data[0].value.toString() + sensor.unit,
+        sensor.data.length > 0
+            ? (sensor.data[sensor.data.length - 1].value.toString() +
+                sensor.unit)
+            : "No data available",
         style: TextStyle(fontSize: 30),
       ),
       trailing: Row(
@@ -65,7 +75,7 @@ class SensorTile extends StatelessWidget {
         await Navigator.of(context).pushNamed('/sensorDetailsPage', arguments: {
           "blocProvider": BlocProvider.of<ModuleBloc>(context),
           "moduleIndex": moduleIndex,
-          "sensorId": sensor.sensorId,
+          "sensorIndex": sensorIndex,
         });
         dispatchUpdateList(context);
       },

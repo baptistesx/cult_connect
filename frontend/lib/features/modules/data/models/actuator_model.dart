@@ -31,8 +31,8 @@ class ActuatorModel extends Actuator {
       state: json['state'],
       hasVariableValue: json['hasVariableValue'],
       value: json['value'],
-      startTime: json['startTime'],
-      stopTime: json['stopTime'],
+      startTime: DateTime.parse(json['startTime']),
+      stopTime: DateTime.parse(json['stopTime']),
     );
   }
 

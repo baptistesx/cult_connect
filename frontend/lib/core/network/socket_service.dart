@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:cult_connect/features/modules/domain/entities/module.dart';
+import 'package:cult_connect/features/modules/domain/entities/sensor.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -18,24 +22,47 @@ class SocketService {
     });
 
     socket.on("connect", (_) {
-      socket.emit('identification', 'USER_123');
+      socket.emit('identification', 'USER_' + jwt);
     });
 
     socket.on("disconnect", (_) => print('Disconnected'));
 
-    socket.on("appNewData", (data) {
+    socket.on("appNewData", (dataReceived) {
+      var dataDecoded = json.decode(dataReceived);
+
+      print("----------------");
+      print("----------------");
+      print(dataDecoded['moduleId']);
+      print("----------------");
+      print(dataDecoded['sensorId']);
+      print("----------------");
+      print(dataDecoded['data']);
+      print("----------------");
+
       for (int i = 0; i < globalUser.modules.length; i++) {
-        if (data['moduleId'] == globalUser.modules[i].moduleId) {
-          globalUser.modules[i].sensors[data['sensorId']].data =
-              data['data'] != null
-                  ? (data['data'] as List)
-                      .map((data) => DataModel.fromJson(data))
-                      .toList()
-                  : new List();
-          dispatchUpdateList(this.socketContext);
-          break;
+        Module module = globalUser.modules[i];
+        if (module.moduleId == dataDecoded['moduleId']) {
+          for (int j = 0; j < module.sensors.length; j++) {
+            Sensor sensor = module.sensors[j];
+            if (sensor.sensorId == dataDecoded['sensorId']) {
+              sensor.data = dataDecoded['data'] != null
+              ? (dataDecoded['data'] as List)
+                  .map((data) => DataModel.fromJson(data))
+                  .toList()
+              : new List();
+            }
+          }
         }
       }
+
+      // globalUser.modules[dataDecoded['moduleIndex']]
+      //         .sensors[dataDecoded['sensorIndex']].data =
+      //     dataDecoded['data'] != null
+      //         ? (dataDecoded['data'] as List)
+      //             .map((data) => DataModel.fromJson(data))
+      //             .toList()
+      //         : new List();
+      dispatchUpdateList(this.socketContext);
     });
   }
 

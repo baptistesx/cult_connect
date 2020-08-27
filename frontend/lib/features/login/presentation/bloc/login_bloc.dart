@@ -125,8 +125,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             (failure) async* {
               yield* _streamFailure(failure);
             },
-            (jwt) async* {
+            (jwtReceived) async* {
               storage.write(key: "jwt", value: jwt);
+              jwt = jwtReceived;
+
               final failureOrUser = await signIn(jwt);
               yield* _eitherLoadedOrErrorState(failureOrUser);
             },
@@ -170,8 +172,18 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         },
         (_) async* {
           yield LoginLoading();
-          final failureOrUser = await updatePassword(event.loginParams);
-          yield* _eitherLoadedOrErrorState(failureOrUser);
+          final failureOrJWT = await updatePassword(event.loginParams);
+          yield* failureOrJWT.fold(
+            (failure) async* {
+              yield* _streamFailure(failure);
+            },
+            (jwtReceived) async* {
+              storage.write(key: "jwt", value: jwt);
+              jwt = jwtReceived;
+              final failureOrUser = await signIn(jwt);
+              yield* _eitherLoadedOrErrorState(failureOrUser);
+            },
+          );
         },
       );
     }

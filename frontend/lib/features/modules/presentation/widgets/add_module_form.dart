@@ -20,20 +20,27 @@ class AddModuleForm extends StatelessWidget {
   final _addModuleFormKey = GlobalKey<FormState>();
 
   final routerSsidController = TextEditingController(
-      text: globalUser.routerSsid.isEmpty ? "" : globalUser.routerSsid);
+      // text: globalUser.routerSsid == null
+      //     ? ""
+      //     : (globalUser.routerSsid.isEmpty ? "" : globalUser.routerSsid)
+      );
   final routerPasswordController = TextEditingController(
-      text: globalUser.routerPassword.isEmpty ? "" : globalUser.routerPassword);
+      // text: globalUser.routerPassword == null
+      //     ? ""
+      //     : (globalUser.routerPassword.isEmpty
+      //         ? ""
+      //         : globalUser.routerPassword)
+      );
 
-  WifiParams wifiParams = WifiParams(
-      routerSsid: globalUser.routerSsid.isEmpty ? "" : globalUser.routerSsid,
-      routerPassword:
-          globalUser.routerPassword.isEmpty ? "" : globalUser.routerPassword);
+  WifiParams wifiParams = WifiParams(routerSsid: "", routerPassword: "");
 
   AddModuleParams addModuleParams = AddModuleParams(
     publicId: "",
     privateId: "",
     name: "",
     place: "",
+    routerSsid: "",
+    routerPassword: "",
   );
 
   @override
@@ -54,8 +61,16 @@ class AddModuleForm extends StatelessWidget {
           Scaffold.of(context).showSnackBar(snackBar);
         } else if (state is Loaded) {
           device.disconnect();
-          Navigator.of(context).pop();
-          Navigator.of(context).pop();
+          if (globalUser.modules.length == 1) {
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              '/dashboardPages',
+              (Route<dynamic> route) => false,
+              arguments: null,
+            );
+          } else {
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          }
         }
       },
       builder: (context, state) {
@@ -152,7 +167,7 @@ class AddModuleForm extends StatelessWidget {
                                 },
                               ),
                               SizedBox(height: 30),
-                              Text(device.name,
+                              Text("MODULE_" + device.name.substring(2, 7),
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 25,
@@ -270,6 +285,7 @@ class AddModuleForm extends StatelessWidget {
                                           onPressed: () async {
                                             if (_addModuleFormKey.currentState
                                                 .validate()) {
+                                                  print(addModuleParams);
                                               List<int> val2Send =
                                                   _getIdsInListOfInt();
 
@@ -323,6 +339,8 @@ class AddModuleForm extends StatelessWidget {
   void dispatchSendRouterIds2Module(BuildContext context,
       BluetoothCharacteristic characteristic, List<int> val2Send) {
     addModuleParams.publicId = publicId;
+    addModuleParams.routerSsid= wifiParams.routerSsid;
+    addModuleParams.routerPassword= wifiParams.routerPassword;
     BlocProvider.of<ModuleBloc>(context).add(
         LaunchSendRouterIds2Module(characteristic, val2Send, addModuleParams));
   }

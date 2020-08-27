@@ -49,6 +49,7 @@ class _DashboardPagesState extends State<DashboardPages> {
 
   @override
   Widget build(BuildContext context) {
+    print(globalUser);
     initShowModulesSettingsArray();
 
     final List<Widget> _pages = <Widget>[

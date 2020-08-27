@@ -78,15 +78,15 @@ class ModuleTile extends StatelessWidget {
                     scrollDirection: Axis.vertical,
                     shrinkWrap: true,
                     itemCount: module.sensors.length,
-                    itemBuilder: (context, int indexSensors) {
-                      String key = module.sensors.keys.elementAt(indexSensors);
-                      Sensor sensor = module.sensors[key];
+                    itemBuilder: (context, int sensorIndex) {
+                      Sensor sensor = module.sensors[sensorIndex];
                       if ((showOnlyFavourites && sensor.isFavourite) ||
                           !showOnlyFavourites) {
                         return SensorTile(
                             sensor: sensor,
                             module: module,
-                            moduleIndex: moduleIndex);
+                            moduleIndex: moduleIndex,
+                            sensorIndex: sensorIndex);
                       }
                       return Container();
                     }),

@@ -22,22 +22,19 @@ module.exports.userExists = function (email, callback) {
 
 //------------ Vérifications pour l'ajout d'un module ------------
 //Vérification qu'un module match avec les IDs reçus
-module.exports.moduleExists = function (res, publicID, privateID, callback) {
-    if (res == null) {
-        modules.findOne({
-            publicID: publicID,
-            privateID: privateID
-        }, function (err, module) {
-            if (err || !module) {
-                //Les IDs ne matchent pas => le module correspondant n'existe pas
-                callback("This module doesn't exist. Try again.", null)
-            } else {
-                callback(null, module);
-            }
-        });
-    } else {
-        callback(res, null)
-    }
+module.exports.moduleExists = function (publicID, privateID, callback) {
+    modules.findOne({
+        _id: publicID,
+        privateID: privateID
+    }, function (err, module) {
+        if (err || !module) {
+            console.log(publicID + " " + privateID)
+            //Les IDs ne matchent pas => le module correspondant n'existe pas
+            callback("This module doesn't exist. Try again.", null)
+        } else {
+            callback(null, module);
+        }
+    });
 }
 
 //Vérifie si l'utilisateur a déjà ajouté ce module

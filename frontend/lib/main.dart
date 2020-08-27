@@ -8,12 +8,11 @@ import 'route_generator.dart';
 final storage = FlutterSecureStorage();
 
 UserModel globalUser = UserModel(
-  userId: null,
-  emailAddress: null,
-  modules: null,
-  favouriteSensors: null,
-  routerPassword: null,
-  routerSsid: null,
+  emailAddress: "",
+  modules: List(),
+  favouriteSensors: [],
+  routerPassword: "",
+  routerSsid: "",
 );
 
 String jwt;
@@ -32,8 +31,8 @@ void main() async {
   await di.initGlobal();
   await di.initLoginDI();
   await di.initModulesDI();
+  // await storage.write(key: "jwt", value: "");
   jwt = await jwtOrEmpty;
-  print("jwt:$jwt");
   runApp(MyApp());
 }
 

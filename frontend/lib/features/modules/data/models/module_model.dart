@@ -14,7 +14,7 @@ class ModuleModel extends Module {
     @required String name,
     @required String place,
     @required bool used,
-    @required Map<String, Sensor> sensors,
+    @required List<Sensor> sensors,
     @required List<Actuator> actuators,
   }) : super(
           moduleId: moduleId,
@@ -29,18 +29,17 @@ class ModuleModel extends Module {
 
   factory ModuleModel.fromJson(Map<String, dynamic> json) {
     return ModuleModel(
-      moduleId: json['moduleId'],
-      publicId: json['publicId'],
-      privateId: json['privateId'],
+      moduleId: json['_id'],
+      publicId: json['publicID'],
+      privateId: json['privateID'],
       name: json['name'],
       place: json['place'],
       used: json['used'],
       sensors: json['sensors'] != null
-          ? (json['sensors'] as Map<String, dynamic>).map((sensorId, sensor) {
-              return MapEntry<String, SensorModel>(
-                  sensorId, SensorModel.fromJson(sensor));
-            })
-          : new Map<String, Sensor>(),
+          ? (json['sensors'] as List)
+              .map((sensor) => SensorModel.fromJson(sensor))
+              .toList()
+          : new List(),
       actuators: json['actuators'] != null
           ? (json['actuators'] as List)
               .map((actuator) => ActuatorModel.fromJson(actuator))
@@ -49,10 +48,6 @@ class ModuleModel extends Module {
     );
   }
   Map<String, dynamic> toJson() {
-    Map<dynamic, dynamic> sensors = this
-        .sensors
-        .map((id, sensor) => MapEntry(id, (sensor as SensorModel).toJson()));
-
     return {
       'moduleId': moduleId,
       'publicId': publicId,

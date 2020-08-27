@@ -22,7 +22,7 @@ class SensorDetailsPage extends StatelessWidget {
     Key key,
     this.data,
   })  : sensor =
-            globalUser.modules[data["moduleIndex"]].sensors[data["sensorId"]],
+            globalUser.modules[data["moduleIndex"]].sensors[data["sensorIndex"]],
         super(key: key);
 
   @override
@@ -57,7 +57,7 @@ class SensorDetailsPage extends StatelessWidget {
                       BlocBuilder<ModuleBloc, ModuleState>(
                         builder: (context, state) {
                           sensor.name = globalUser.modules[data["moduleIndex"]]
-                              .sensors[data["sensorId"]].name;
+                              .sensors[data["sensorIndex"]].name;
                           return Text(sensor.name);
                         },
                       ),
@@ -178,7 +178,7 @@ class SensorDetailsPage extends StatelessWidget {
   }
 
   Widget getChartWidget() {
-    print(sensor);
+    print("sensor.data:"+sensor.data.toString());
     var series = [
       new charts.Series(
         id: 'Clicks',

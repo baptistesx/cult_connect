@@ -62,11 +62,20 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<Either<Failure, User>> updatePassword(
+  Future<Either<Failure, String>> updatePassword(
       String emailAddress, String newPassword) async {
-    return await _requestUserAction(() {
-      return remoteDataSource.updatePassword(emailAddress, newPassword);
-    });
+    if (await networkInfo.isConnected) {
+      try {
+        final jwt =
+            await remoteDataSource.updatePassword(emailAddress, newPassword);
+        // localDataSource.cacheUser(remoteUser);
+        return Right(jwt);
+      } on ServerException {
+        return Left(ServerFailure());
+      }
+    } else {
+      return Left(OfflineFailure());
+    }
   }
 
   Future<Either<Failure, User>> _requestUserAction(
@@ -75,7 +84,7 @@ class UserRepositoryImpl implements UserRepository {
     if (await networkInfo.isConnected) {
       try {
         final remoteUser = await requestUserAction();
-        localDataSource.cacheUser(remoteUser);
+        // localDataSource.cacheUser(remoteUser);
         return Right(remoteUser);
       } on ServerException {
         return Left(ServerFailure());

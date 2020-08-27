@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { Double } = require("mongodb");
 var Schema = mongoose.Schema,
   ObjectId = Schema.ObjectId;
 
@@ -14,10 +15,11 @@ const sensorsSchema = new Schema({
   limitMin: Number,
   limitMax: Number,
   automaticMode: Boolean,
-  data: {
-    type: ObjectId,
-    ref: "datas"
-  },
+  isFavourite: Boolean,
+  data: [{
+    date: Date,
+    value: Number,
+  }],
   module: {
     type: ObjectId,
     ref: "modules"
