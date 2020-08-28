@@ -10,8 +10,8 @@
 
 #include <Arduino.h>
 
-#define MODULE_NAME "MODULE_123"
-#define PRIVATE_ID "456"
+#define MODULE_NAME "M_5e7a80125d33fe0d041ff8cb"
+#define PRIVATE_ID "123"
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
 
@@ -123,7 +123,7 @@ void setup()
 {
     Serial.begin(115200);
 
-    BLEDevice::init("MODULE_123");
+    BLEDevice::init(MODULE_NAME);
     pServer = BLEDevice::createServer();
     pServer->setCallbacks(new MyServerCallbacks());
 
