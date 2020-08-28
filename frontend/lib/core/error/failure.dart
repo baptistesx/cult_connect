@@ -15,14 +15,29 @@ class CacheFailure extends Failure {}
 class OfflineFailure extends Failure {}
 
 // Input failures
+class BadIdsFailure extends Failure {
+  @override
+  String get getFailureMessage => BAD_IDS_FAILURE_MESSAGE;
+}
+
 class InvalidEmailAddressFailure extends Failure {
   @override
   String get getFailureMessage => INVALID_EMAIL_FAILURE_MESSAGE;
 }
 
+class NotUsedEmailAddressFailure extends Failure {
+  @override
+  String get getFailureMessage => NOT_USED_EMAIL_ADDRESS_FAILURE_MESSAGE;
+}
+
 class EmptyEmailAddressFailure extends Failure {
   @override
   String get getFailureMessage => EMPTY_EMAIL_FAILURE_MESSAGE;
+}
+
+class EmailAddressAlreadyUsedFailure extends Failure {
+  @override
+  String get getFailureMessage => EMAIL_ADDRESS_ALREADY_USED_FAILURE_MESSAGE;
 }
 
 class InvalidPasswordFailure extends Failure {

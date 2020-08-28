@@ -27,10 +27,13 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         "$SERVER_IP/api/getJWT/?email=$emailAddress&pwd=$password";
     final response = await client.get(url);
 
-    if (response.statusCode == 200) {
-      return json.decode(response.body)['jwt'];
-    } else {
-      throw ServerException();
+    switch (response.statusCode) {
+      case 200:
+        return json.decode(response.body)['jwt'];
+      case 401:
+        throw BadIdsException();
+      default:
+        throw ServerException();
     }
   }
 
@@ -49,10 +52,13 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       },
     );
 
-    if (response.statusCode == 201) {
-      return json.decode(response.body)['jwt'];
-    } else {
-      throw ServerException();
+    switch (response.statusCode) {
+      case 201:
+        return json.decode(response.body)['jwt'];
+      case 409:
+        throw EmailAddressAlreadyUsedException();
+      default:
+        throw ServerException();
     }
   }
 
@@ -108,10 +114,14 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     );
 
     final json = jsonDecode(response.body);
-    if (response.statusCode == 200) {
-      return json['verificationCode'];
-    } else {
-      throw ServerException();
+
+    switch (response.statusCode) {
+      case 200:
+        return json['verificationCode'];
+      case 409:
+        throw NotUsedEmailAddressException();
+      default:
+        throw ServerException();
     }
   }
 }

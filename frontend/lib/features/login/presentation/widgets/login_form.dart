@@ -14,128 +14,122 @@ class LoginForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<LoginBloc, LoginState>(
-      listener: (context, state) async {},
-      builder: (context, state) {
-        return Form(
-          key: _signupFormKey,
-          child: Column(
+    return Form(
+      key: _signupFormKey,
+      child: Column(
+        children: <Widget>[
+          TextFormField(
+            controller: emailAddressController,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.email),
+              hintText: 'Email',
+              labelText: 'Email',
+            ),
+            onChanged: (value) {
+              loginParams.emailAddress = value;
+            },
+            onFieldSubmitted: (value) {
+              if (_signupFormKey.currentState.validate()) {
+                dispatchSignIn(context);
+              }
+            },
+            validator: (String emailAddress) {
+              if (emailAddress.isEmpty) return EMPTY_EMAIL_FAILURE_MESSAGE;
+              if (!RegExp(EMAIL_REGEX).hasMatch(emailAddress))
+                return INVALID_EMAIL_FAILURE_MESSAGE;
+              return null;
+            },
+          ),
+          SizedBox(height: 20),
+          TextFormField(
+            controller: passwordController,
+            obscureText: true,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.lock),
+              hintText: 'Password',
+              labelText: 'Password',
+            ),
+            onChanged: (value) {
+              loginParams.password = value;
+            },
+            onFieldSubmitted: (value) {
+              if (_signupFormKey.currentState.validate()) {
+                dispatchSignIn(context);
+              }
+            },
+            validator: (String password) {
+              if (password.isEmpty) return EMPTY_PASSWORD_FAILURE_MESSAGE;
+              if (password.length <= 6) return INVALID_PASSWORD_FAILURE_MESSAGE;
+              return null;
+            },
+          ),
+          SizedBox(height: 10),
+          FlatButton(
+            onPressed: () {
+              Navigator.of(context).pushNamed(
+                '/forgotPasswordFirstPage',
+                arguments: null,
+              );
+            },
+            child: Text(
+              'Forgot your password?',
+              style: Theme.of(context).textTheme.headline4,
+            ),
+          ),
+          Row(
             children: <Widget>[
-              TextFormField(
-                controller: emailAddressController,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email),
-                  hintText: 'Email',
-                  labelText: 'Email',
+              Expanded(
+                child: RaisedButton(
+                  child: Text('Let\'s go!'),
+                  color: Theme.of(context).accentColor,
+                  textTheme: ButtonTextTheme.primary,
+                  textColor: const Color(0xFFFFFFFF),
+                  onPressed: () {
+                    if (_signupFormKey.currentState.validate()) {
+                      dispatchSignIn(context);
+                    }
+                  },
                 ),
-                onChanged: (value) {
-                  loginParams.emailAddress = value;
-                },
-                onFieldSubmitted: (value) {
-                  if (_signupFormKey.currentState.validate()) {
-                    dispatchSignIn(context);
-                  }
-                },
-                validator: (String emailAddress) {
-                  if (emailAddress.isEmpty) return EMPTY_EMAIL_FAILURE_MESSAGE;
-                  if (!RegExp(EMAIL_REGEX).hasMatch(emailAddress))
-                    return INVALID_EMAIL_FAILURE_MESSAGE;
-                  return null;
-                },
-              ),
-              SizedBox(height: 20),
-              TextFormField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock),
-                  hintText: 'Password',
-                  labelText: 'Password',
-                ),
-                onChanged: (value) {
-                  loginParams.password = value;
-                },
-                onFieldSubmitted: (value) {
-                  if (_signupFormKey.currentState.validate()) {
-                    dispatchSignIn(context);
-                  }
-                },
-                validator: (String password) {
-                  if (password.isEmpty) return EMPTY_PASSWORD_FAILURE_MESSAGE;
-                  if (password.length <= 6)
-                    return INVALID_PASSWORD_FAILURE_MESSAGE;
-                  return null;
-                },
-              ),
-              SizedBox(height: 10),
-              FlatButton(
-                onPressed: () {
-                  Navigator.of(context).pushNamed(
-                    '/forgotPasswordFirstPage',
-                    arguments: null,
-                  );
-                },
-                child: Text(
-                  'Forgot your password?',
-                  style: Theme.of(context).textTheme.headline4,
-                ),
-              ),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: RaisedButton(
-                      child: Text('Let\'s go!'),
-                      color: Theme.of(context).accentColor,
-                      textTheme: ButtonTextTheme.primary,
-                      textColor: const Color(0xFFFFFFFF),
-                      onPressed: () {
-                        if (_signupFormKey.currentState.validate()) {
-                          dispatchSignIn(context);
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              Text(
-                '- or -',
-                style: Theme.of(context).textTheme.headline4,
-              ),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: RaisedButton(
-                      child: Text('Register'),
-                      color: Colors.grey[200],
-                      textTheme: ButtonTextTheme.primary,
-                      onPressed: () {
-                        if (_signupFormKey.currentState.validate()) {
-                          dispatchRegister(context);
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 10),
-              BlocBuilder<LoginBloc, LoginState>(
-                builder: (context, state) {
-                  if (state is LoginLoading) {
-                    return LoadingWidget(color: Theme.of(context).accentColor);
-                  } else {
-                    return Container(
-                      width: 0.0,
-                      height: 0.0,
-                    );
-                  }
-                },
               ),
             ],
           ),
-        );
-      },
+          Text(
+            '- or -',
+            style: Theme.of(context).textTheme.headline4,
+          ),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: RaisedButton(
+                  child: Text('Register'),
+                  color: Colors.grey[200],
+                  textTheme: ButtonTextTheme.primary,
+                  onPressed: () {
+                    if (_signupFormKey.currentState.validate()) {
+                      dispatchRegister(context);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
+          BlocBuilder<LoginBloc, LoginState>(
+            builder: (context, state) {
+              if (state is LoginLoading) {
+                return LoadingWidget(color: Theme.of(context).accentColor);
+              } else {
+                return Container(
+                  width: 0.0,
+                  height: 0.0,
+                );
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 

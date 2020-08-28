@@ -10,6 +10,8 @@ class LoginEmpty extends LoginState {}
 
 class LoginLoading extends LoginState {}
 
+class JWTCheckLoading extends LoginState {}
+
 class LoginLoaded extends LoginState {
   LoginLoaded() : super([]);
 }

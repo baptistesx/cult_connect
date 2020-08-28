@@ -53,8 +53,8 @@ module.exports.addModule = function (
         );
         // S'il n'y a tjrs pas de message d'erreur
         if (res == null) {
-          module.name = moduleName
-          module.place = modulePlace
+          if (moduleName != "") module.name = moduleName
+          if (modulePlace != "") module.place = modulePlace
           module.used = true
           module.user = user._id // liaison de l'utilisateur au module
           user.modules.push(module._id) // liaison du module à l'utilisateur
@@ -94,7 +94,7 @@ module.exports.register = function (email, password, callback) {
       function (err, user) {
         if (user != null) {
           //Cas 1: cette adresse email est déjà utilisée
-          callback(409, "An user with that username already exists");
+          callback(409, "This email address is already used.");
         } else {
           //Cas 2: cette adresse email n'est pas déjà utilisée => création de l'utilisateur
           //Le password est encrypté
@@ -141,7 +141,11 @@ module.exports.updatePassword = function (emailAddress, newPassword, callback) {
 createUser = function (email, encPassword, callback) {
   var newUser = new users({
     email: email,
-    pwd: encPassword
+    pwd: encPassword,
+    modules: [],
+    favouriteSensors: [],
+    routerPassword: "",
+    routerSsid: "",
   });
   newUser.save(function (err, user) {
     if (err) {
@@ -221,7 +225,9 @@ getJWT = function (email, password, callback) {
             jwt: token
           });
         } else {
-          callback(401, "There's no user matching that");
+          callback(401, {
+            errorMessage: "Bad identifiers"
+          });
         }
       }
     );

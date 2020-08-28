@@ -48,7 +48,7 @@ class LoginPage extends StatelessWidget {
         },
         builder: (context, loginState) {
           if (loginState == null && jwt != "") dispatchAutoSignIn(context);
-          if (loginState is LoginLoading ||
+          if (loginState is JWTCheckLoading ||
               (loginState is LoginLoaded && jwt != "")) {
             return Center(
                 child: LoadingWidget(color: Theme.of(context).accentColor));

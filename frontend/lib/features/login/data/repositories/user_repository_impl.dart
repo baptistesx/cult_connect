@@ -32,6 +32,8 @@ class UserRepositoryImpl implements UserRepository {
         return Right(jwt);
       } on ServerException {
         return Left(ServerFailure());
+      } on BadIdsException {
+        return Left(BadIdsFailure());
       }
     } else {
       return Left(OfflineFailure());
@@ -53,6 +55,8 @@ class UserRepositoryImpl implements UserRepository {
         final jwt = await remoteDataSource.register(emailAddress, password);
         // localDataSource.cacheUser(remoteUser);
         return Right(jwt);
+      } on EmailAddressAlreadyUsedException {
+        return Left(EmailAddressAlreadyUsedFailure());
       } on ServerException {
         return Left(ServerFailure());
       }
@@ -102,6 +106,8 @@ class UserRepositoryImpl implements UserRepository {
         final verficiationCode =
             await remoteDataSource.sendVerificationCode(emailAddress);
         return Right(verficiationCode);
+      } on NotUsedEmailAddressException {
+        return Left(NotUsedEmailAddressFailure());
       } on ServerException {
         return Left(ServerFailure());
       }

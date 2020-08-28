@@ -84,8 +84,7 @@ app.get("/api/getJWT/", function (req, res) {
 
   var email = req.query.email;
   var password = req.query.pwd;
-  console.log(email)
-  console.log(password)
+
   mongo.getJWT(email, password, function (code, answer) {
     res.status(code).send(answer);
   });
@@ -129,7 +128,7 @@ app.post("/api/addModule", function (req, res) {
           publicId,
           privateId,
           function (code, answer) {
-            console.log("code:"+code+" answer: "+answer)
+            console.log("code:" + code + " answer: " + answer)
             res.status(code).send(answer);
           }
         );
@@ -433,34 +432,40 @@ function generateRandomVerificationCode(length) {
 
 app.post("/api/sendVerificationCode", function (req, res) {
   console.log("new request: /api/sendVerificationCode");
-  setTimeout(function () {
-    var emailAddress = req.body.emailAddress;
-    console.log(emailAddress);
+  var emailAddress = req.body.emailAddress;
+  console.log(emailAddress);
 
-    //TODO: check if user exists
+  users.findOne({
+    email: emailAddress
+  }, function (err, user) {
+    if (user != null) {
+      //TODO: generate random verification code
+      var code = generateRandomVerificationCode(5)
 
-    //TODO: generate random verification code
-    var code = generateRandomVerificationCode(5)
+      var mailOptions = {
+        from: 'seuxbaptiste2@gmail.com',
+        to: emailAddress,
+        subject: 'Verification code for a new password!',
+        text: 'Code: ' + code,
+      };
 
-    var mailOptions = {
-      from: 'seuxbaptiste2@gmail.com',
-      to: emailAddress,
-      subject: 'Verification code for a new password!',
-      text: 'Code: ' + code,
-    };
-
-    transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-        res.status(500).send("ERROR");
-      } else {
-        console.log('Email sent: ' + info.response);
-        res.status(200).send(JSON.stringify({
-          "verificationCode": code,
-        }));
-      }
-    });
-  }, 2000);
+      transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+          console.log(error);
+          res.status(500).send("ERROR");
+        } else {
+          console.log('Email sent: ' + info.response);
+          res.status(200).send(JSON.stringify({
+            "verificationCode": code,
+          }));
+        }
+      });
+    } else {
+      res.status(409).send({
+        errorMessage: "No user matches this email address"
+      })
+    }
+  })
 });
 
 app.post("/api/updatePassword", function (req, res) {
@@ -468,9 +473,7 @@ app.post("/api/updatePassword", function (req, res) {
   setTimeout(function () {
     var emailAddress = req.body.emailAddress;
     var newPassword = req.body.newPassword;
-    console.log(emailAddress);
-    console.log(newPassword);
-    //TODO: update password
+
     controler.userExists(emailAddress, function (err, user) {
       if (user != null) {
         console.log("user not nul!")
@@ -662,8 +665,9 @@ io.sockets.on('connection', function (socket) {
     }
     //Le client est un utilisateur 
     else if (name.split('_')[0] == "USER") {
+      console.log(name)
       // console.log("user jwt: " + name.split('_')[1])
-      var email = jwt.verify(name.split('_')[1], KEY, {
+      var email = jwt.verify(name.split('_')[1].toString(), KEY, {
         algorithm: "HS256"
       }).email;
 
@@ -676,6 +680,7 @@ io.sockets.on('connection', function (socket) {
 
           socket.join(userId)
         } else {
+          console.log("user null")
           //TODO: handle error
         }
       });

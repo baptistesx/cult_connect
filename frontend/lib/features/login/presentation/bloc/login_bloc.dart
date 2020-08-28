@@ -17,8 +17,13 @@ import '../util/login_input_checker.dart';
 
 const String SERVER_FAILURE_MESSAGE = 'Server Failure';
 const String CACHE_FAILURE_MESSAGE = 'Cache Failure';
+const String EMAIL_ADDRESS_ALREADY_USED_FAILURE_MESSAGE =
+    'This email address is already used.';
+const String BAD_IDS_FAILURE_MESSAGE = 'Bad identifiers';
 const String EMPTY_EMAIL_FAILURE_MESSAGE = 'Please fill in the email field';
 const String INVALID_EMAIL_FAILURE_MESSAGE = 'Bad email address format.';
+const String NOT_USED_EMAIL_ADDRESS_FAILURE_MESSAGE =
+    'No user matches this email address.';
 const String EMPTY_PASSWORD_FAILURE_MESSAGE =
     'Please fill in the password field';
 const String INVALID_PASSWORD_FAILURE_MESSAGE =
@@ -64,7 +69,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   @override
   Stream<LoginState> mapEventToState(LoginEvent event) async* {
     if (event is LaunchAutoSignIn) {
-      yield LoginLoading();
+      yield JWTCheckLoading();
 
       final failureOrUser = await signIn(jwt);
       yield failureOrUser.fold(
@@ -213,6 +218,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         return CACHE_FAILURE_MESSAGE;
       case EmptyEmailAddressFailure:
         return EMPTY_EMAIL_FAILURE_MESSAGE;
+      case NotUsedEmailAddressFailure:
+        return NOT_USED_EMAIL_ADDRESS_FAILURE_MESSAGE;
+      case EmailAddressAlreadyUsedFailure:
+        return EMAIL_ADDRESS_ALREADY_USED_FAILURE_MESSAGE;
       case InvalidEmailAddressFailure:
         return INVALID_EMAIL_FAILURE_MESSAGE;
       case EmptyPasswordFailure:
@@ -221,6 +230,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         return INVALID_PASSWORD_FAILURE_MESSAGE;
       case VerificationCodeNotMatchingFailure:
         return VERIFICATION_CODE_NOT_MATCHING_FAILURE_MESSAGE;
+      case BadIdsFailure:
+        return BAD_IDS_FAILURE_MESSAGE;
       default:
         return 'Unexpected Error';
     }

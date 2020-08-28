@@ -18,12 +18,9 @@ UserModel globalUser = UserModel(
 String jwt;
 
 Future<String> get jwtOrEmpty async {
-  //TODO: To uncomment to keep always connected once connected
-  // var jwt =
-  //     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRvdG9AZ21haWwuY29tIiwiaWF0IjoxNTkxOTY5ODcwLCJleHAiOjE1OTMyNjU4NzB9.4Y6ew9gnbAdbq-9C01CKnkbl8uDstJ4MlKlNu-pawn4";
-  var jwt = await storage.read(key: "jwt");
-  if (jwt == null) return "";
-  return jwt;
+  var jwtToReturn = await storage.read(key: "jwt");
+  if (jwtToReturn == null) return "";
+  return jwtToReturn;
 }
 
 void main() async {
