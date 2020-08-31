@@ -32,7 +32,7 @@ const {
 } = require("inspector");
 
 const KEY = "m yincredibl y(!!1!11!)zpG6z2s8)Key'!";
- 
+
 app.use(bodyParser.urlencoded({
   extended: false
 }));
@@ -336,97 +336,97 @@ app.post("/api/user/updateActuatorStateById", function (req, res) {
   });
 });
 
-app.post("/api/signIn", function (req, res) {
-  console.log("new request: /api/signIn");
-  setTimeout(function () {
-    var email = req.body.email;
-    var pwd = req.body.pwd;
-    console.log(email)
-    console.log(pwd)
-    res.status(200).send(JSON.stringify({
-      "userId": "123",
-      "emailAddress": "toto@gmail.com",
-      "token": "123456",
-      "routerSsid": "aaa",
-      "routerPassword": "bbb",
-      "modules": [{
-        "moduleId": "123",
-        "publicId": "1234",
-        "privateId": "1234",
-        "name": "module1",
-        "place": "serre",
-        "used": false,
-        "sensors": {
-          "147": {
-            "sensorId": "147",
-            "name": "sensor1",
-            "dataType": "humidity",
-            "unit": "%",
-            "acceptableMin": 20,
-            "acceptableMax": 30,
-            "criticalMin": 10,
-            "criticalMax": 40,
-            "nominalValue": 25,
-            "limitMin": 0,
-            "limitMax": 100,
-            "automaticMode": false,
-            "isFavourite": false,
-            "data": [{
-              "date": "2020-04-03T22:00:00.000+00:00",
-              "value": 65
-            }],
-            "actuators": [],
-          },
-          "10": {
-            "sensorId": "10",
-            "name": "sensor2",
-            "dataType": "temperature",
-            "unit": "°C",
-            "acceptableMin": 20,
-            "acceptableMax": 30,
-            "criticalMin": 10,
-            "criticalMax": 40,
-            "nominalValue": 25,
-            "limitMin": 0,
-            "limitMax": 100,
-            "automaticMode": false,
-            "isFavourite": false,
-            "data": [{
-              "date": "2020-04-03T22:00:00.000+00:00",
-              "value": 30
-            }],
-            "actuators": [],
-          },
-        },
-        "actuators": [],
-      }],
-      "favouriteSensors": ["10", "147"],
+// app.post("/api/signIn", function (req, res) {
+//   console.log("new request: /api/signIn");
+//   setTimeout(function () {
+//     var email = req.body.email;
+//     var pwd = req.body.pwd;
+//     console.log(email)
+//     console.log(pwd)
+//     res.status(200).send(JSON.stringify({
+//       "userId": "123",
+//       "emailAddress": "toto@gmail.com",
+//       "token": "123456",
+//       "routerSsid": "aaa",
+//       "routerPassword": "bbb",
+//       "modules": [{
+//         "moduleId": "123",
+//         "publicId": "1234",
+//         "privateId": "1234",
+//         "name": "module1",
+//         "place": "serre",
+//         "used": false,
+//         "sensors": {
+//           "147": {
+//             "sensorId": "147",
+//             "name": "sensor1",
+//             "dataType": "humidity",
+//             "unit": "%",
+//             "acceptableMin": 20,
+//             "acceptableMax": 30,
+//             "criticalMin": 10,
+//             "criticalMax": 40,
+//             "nominalValue": 25,
+//             "limitMin": 0,
+//             "limitMax": 100,
+//             "automaticMode": false,
+//             "isFavourite": false,
+//             "data": [{
+//               "date": "2020-04-03T22:00:00.000+00:00",
+//               "value": 65
+//             }],
+//             "actuators": [],
+//           },
+//           "10": {
+//             "sensorId": "10",
+//             "name": "sensor2",
+//             "dataType": "temperature",
+//             "unit": "°C",
+//             "acceptableMin": 20,
+//             "acceptableMax": 30,
+//             "criticalMin": 10,
+//             "criticalMax": 40,
+//             "nominalValue": 25,
+//             "limitMin": 0,
+//             "limitMax": 100,
+//             "automaticMode": false,
+//             "isFavourite": false,
+//             "data": [{
+//               "date": "2020-04-03T22:00:00.000+00:00",
+//               "value": 30
+//             }],
+//             "actuators": [],
+//           },
+//         },
+//         "actuators": [],
+//       }],
+//       "favouriteSensors": ["10", "147"],
 
-    }));
-  }, 3000);
-});
+//     }));
+//   }, 3000);
+// });
 
-app.post("/api/register", function (req, res) {
-  console.log("new request: /api/register");
-  setTimeout(function () {
-    var pseudo = req.body.pseudo;
-    var email = req.body.email;
-    var pwd = req.body.pwd;
-    console.log(pseudo)
-    console.log(email)
-    console.log(pwd)
-    res.status(200).send(JSON.stringify({
-      "userId": "123",
-      "emailAddress": "toto@gmail.com",
-      "routerSsid": "",
-      "routerPassword": "",
-      "token": "123456",
-      "modules": [],
-      "favouriteSensors": [],
+// app.post("/api/register", function (req, res) {
+//   console.log("new request: /api/register");
+//   setTimeout(function () {
+//     var pseudo = req.body.pseudo;
+//     var email = req.body.email;
+//     var pwd = req.body.pwd;
+//     console.log(pseudo)
+//     console.log(email)
+//     console.log(pwd)
+//     res.status(200).send(JSON.stringify({
+//       "userId": "123",
+//       "emailAddress": "toto@gmail.com",
+//       "routerSsid": "",
+//       "routerPassword": "",
+//       "token": "123456",
+//       "modules": [],
+//       "favouriteSensors": [],
 
-    }));
-  }, 100);
-});
+//     }));
+//   }, 100);
+// });
 
 app.post("/api/configureWifi", function (req, res) {
   console.log("new request: /api/configureWifi");
@@ -459,6 +459,7 @@ app.post("/api/sendVerificationCode", function (req, res) {
     }));
   }, 2000);
 });
+
 app.post("/api/updatePassword", function (req, res) {
   console.log("new request: /api/updatePassword");
   setTimeout(function () {

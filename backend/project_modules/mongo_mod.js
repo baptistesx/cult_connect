@@ -77,6 +77,20 @@ module.exports.addModule = function (
 };
 
 // --------------- SIGNUP ---------------
+//Inscription d'un utilisateur
+var createUser = function (email, encPassword, callback) {
+  var newUser = new users({
+    email: email,
+    pwd: encPassword
+  });
+  newUser.save(function (err, user) {
+    if (err) {
+      return handleError(err);
+    }
+    callback("User well created!");
+  });
+};
+
 module.exports.register = function (email, password, callback) {
   //Vérification du format de l'email
   var emailVerif = validator.validate(email);
@@ -91,8 +105,9 @@ module.exports.register = function (email, password, callback) {
           //Cas 1: cette adresse email est déjà utilisée
           callback(409, "An user with that username already exists");
         } else {
-          //Cas 2: cette adresse email n'est pas déjà utilisée => création de l'utilisateur
-          //Le password est encrypté
+          // Cas 2: cette adresse email n'est pas déjà utilisée => 
+          //    - password encrypté
+          //    - création de l'utilisateur
           encryptPwd(password, function (encPassword) {
             createUser(email, encPassword, function (answer) {
               callback(201, answer);
@@ -107,27 +122,14 @@ module.exports.register = function (email, password, callback) {
   }
 };
 
-//Inscription d'un utilisateur
-createUser = function (email, encPassword, callback) {
-  var newUser = new users({
-    email: email,
-    pwd: encPassword
-  });
-  newUser.save(function (err, user) {
-    if (err) {
-      return handleError(err);
-    }
-    callback("User well created!");
-  });
-};
 
+// --------------- SIGNIN ---------------
 //Vérification et connexion de l'utilisateur (renvoie un JWT)
 module.exports.logUser = function (email, password, callback) {
   //Le password est encrypté
   encryptPwd(password, function (encPassword) {
     //Recherche d'un utilisateur qui match l'email et le password encrypté
     users.findOne(
-      //TODO: utiliser findOne?
       {
         email: email,
         pwd: encPassword,
