@@ -62,6 +62,13 @@ app.post("/api/signUp", function (req, res) {
   );
 });
 
+//Route pour demande de jwt lors avant connexion
+app.get("/", function (req, res) {
+  console.log("new request: /");
+
+  res.status(200).send("ok");
+});
+
 //Route pour connexion de l'utilisateur
 app.post("/api/signIn", function (req, res) {
   console.log("new request: /api/signIn");
@@ -606,12 +613,6 @@ app.post("/api/addFavouriteSensorById", function (req, res) {
 // Démarrage du serveur
 server = http.createServer(app)
 
-
-
-function storeData(id) {
-  // return "987";
-}
-
 function getSensorData(moduleId, sensor, callback) {
   callback(JSON.stringify({
     moduleId: moduleId,
@@ -619,12 +620,14 @@ function getSensorData(moduleId, sensor, callback) {
     data: sensor.data
   }))
 }
+
 // Chargement de socket.io
 var io = require('socket.io').listen(server);
 
 //Connection d'un nouveau client => nouvelle socket
 io.sockets.on('connection', function (socket) {
   var userId = ""
+
   //identification de la socket
   socket.on('identification', function (name) {
     socket.name = name
@@ -640,20 +643,21 @@ io.sockets.on('connection', function (socket) {
 
       //Le module envoie une nouvelle data
       socket.on('newDataFromModule', function (dataReceived) {
-        console.log(socket.name + " envoie:" + JSON.stringify(dataReceived))
-
+        var res = dataReceived.replace(/'/g, "\"")
+        var dataParsed = JSON.parse(res)
+        
         sensors.findOne({
-          _id: dataReceived.sensorId
+          _id: dataParsed.sensorId
         }, function (err, sensor) {
           console.log(sensor)
-          for (i = 0; i < dataReceived.data.length; i++) {
-            console.log(dataReceived.data[i])
-            sensor.data.push(dataReceived.data[i])
+          for (i = 0; i < dataParsed.data.length; i++) {
+            console.log(dataParsed.data[i])
+            sensor.data.push(dataParsed.data[i])
           }
           //Sauvegarde de la data en base de données
           sensor.save(function (err, sensor) {
             console.log(sensor)
-            getSensorData(dataReceived.moduleId, sensor, function (dataToSend) {
+            getSensorData(dataParsed.moduleId, sensor, function (dataToSend) {
               //Broadcast a toutes les sockets de la room
               io.to(userId).emit("appNewData", dataToSend)
             })
