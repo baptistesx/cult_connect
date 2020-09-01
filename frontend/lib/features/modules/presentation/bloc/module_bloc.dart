@@ -127,10 +127,10 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
 
       var value = await event.characteristic.read();
       print(value);
-      if (value[0] == "0".codeUnitAt(0)) {
+      if (value[0] == "1".codeUnitAt(0)) {
         final failureOrUser = await addModule(event.addModuleParams);
         yield* _eitherLoadedOrErrorState(failureOrUser);
-      } else if (value[0] == "1".codeUnitAt(0)) {
+      } else if (value[0] == "0".codeUnitAt(0)) {
         // yield Empty();
         yield Error(message: INVALID_ROUTER_IDS_MESSAGE);
       } else {

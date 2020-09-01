@@ -1,24 +1,29 @@
 #include "connectivity.h"
 
+extern bool startingDHT22MeasureFlag;
+extern bool oldIsBleON;
+extern bool isBleON;
+extern Ticker startingDHT22MeasureTicker;
+
 String routerSsid = "";
 String routerPassword = "";
 
-bool connection_to_internet_router(void)
+String currentDateTime;
+
+//Define NTP Client to get time
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP);
+
+bool connection2InternetRouter(String ssid, String password)
 {
-    String s = "==========Check connection to internet router==========\n";
-
-    s += "\t\t\trouterSsid: " + routerSsid + "\n";
-    s += "\t\t\trouterPassword: " + routerPassword + "\n";
-    Serial.println(s);
-
     int timeout_internet_connection = 0;
 
     //Initialize the connection
     //c_str() method that converts the content of a string as a c-style => pointer on a char array
-    WiFi.begin(routerSsid.c_str(), routerPassword.c_str());
+    WiFi.begin(ssid.c_str(), password.c_str());
 
     //Try to connect every second while is not connected or no timeout
-    while (!is_internet_connected())
+    while (!isInternetConnected())
     {
         if (timeout_internet_connection == TIMEOUT)
         {
@@ -31,19 +36,20 @@ bool connection_to_internet_router(void)
 
         delay(1000);
 
-        s += ".";
-
         timeout_internet_connection++;
     }
-
-    //TODO: init time
-    // init_time();
-
     return true;
 }
 
 //Return true if the connection to the internet router is established
-bool is_internet_connected(void)
+bool isInternetConnected(void)
 {
     return WiFi.status() == WL_CONNECTED;
 }
+
+void updateCurrentDateTime(void)
+{
+    if (timeClient.update())
+        currentDateTime = timeClient.getFormattedDate();
+}
+

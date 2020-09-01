@@ -1,156 +1,189 @@
-#include <Arduino.h>
-#include "initialisation.h"
-#include <string.h>
-#include "SocketIoClient.h"
-SocketIoClient webSocket;
-#include <HTTPClient.h>
+#include "headers.h"
 
-bool oldIsBleON = false;
-bool isBleON = false;
-/// Socket.IO Settings ///
-char host[] = "Baptiste-PC";                     // Socket.IO Server Address
-int port = 8081;                                 // Socket.IO Port Address
-char path[] = "/socket.io/?transport=websocket"; // Socket.IO Base Path
-bool useSSL = false;                             // Use SSL Authentication
-const char *sslFingerprint = "";                 // SSL Certificate Fingerprint
-bool useAuth = false;                            // use Socket.IO Authentication
-int year = 2000;
-void clearRouterIds()
-{
-    routerSsid = "";
-    routerPassword = "";
-}
-
-void parseRouterIds(String rawIds)
-{
-    bool isSsid = true;
-
-    clearRouterIds();
-
-    for (int i = 0; i < rawIds.length(); i++)
-    {
-        if (rawIds[i] == '&')
-            isSsid = false;
-        else
-        {
-            if (isSsid)
-                routerSsid += rawIds[i];
-            else
-                routerPassword += rawIds[i];
-        }
-    }
-}
-void socket_Connected(const char *payload, size_t length)
-{
-    Serial.println("Socket.IO Connected!");
-    char *id = "\"MODULE_5e7a80125d33fe0d041ff8cb\"";
-    webSocket.emit("identification", id);
-}
-
-void socket_event(const char *payload, size_t length)
-{
-    Serial.print("got message: ");
-    Serial.println(payload);
-}
-void messageEventHandler(const char *payload, size_t length)
-{
-    Serial.printf("got message: %s\n", payload);
-}
+//First executed function when the module starts <=> initialisation
 void setup()
 {
-    serial_port_init();
+    serialPortInit();
+    Serial.printf("=============================\nStarting setup\n=============================\n\n");
 
-    if (!SPIFF_init()) //Init error case
+    Serial.println("[INIT] Serial communication (" + String(SERIAL_SPEED) + " bauds, 8 data bits, no parity, 1 stop bit): OK");
+
+    statusLedsInit();
+    Serial.println("[INIT] Status LEDs: OK");
+
+    resetButtonInit();
+    Serial.println("[INIT] Reset button on PIN " + String(RESET_BUTTON_PIN) + " (press over 2s to reset): OK");
+
+    if (!SPIFFSInit()) //Init error case
     {
-        printf("SPIFFS Mount Failed -> Reboot...\n");
+        printf("[INIT] SPIFFS: KO, SPIFFS Mount Failed -> Reboot...\n");
+
+        ESP.restart();
+    }
+    Serial.println("[INIT] SPIFFS: OK");
+
+    //TODO: to delete
+    // writeFile(SPIFFS, ROUTER_IDS_FILE_PATH, "SFR_89B8&58baqh5jkg88xtvx7cih");
+    // deleteFile(SPIFFS, ROUTER_IDS_FILE_PATH);
+
+    if (getRouterIdFromSPIFFS() == 1)
+    {
+        Serial.println("No internet router ids stored in memory");
+        Serial.println("\t=> BLE mode");
+        BLEInit();
+        Serial.println("[INIT] BLE: OK");
+    }
+    else
+    {
+        if (!connection2InternetRouter(routerSsid, routerPassword))
+        {
+            Serial.println("[INIT] Connection to the internet router: KO");
+            Serial.println("=> ssid: " + routerSsid + " & password: " + routerPassword);
+
+            //TODO: todo
+            // Serial.println("\tTimer configuration to retry later");
+            // start_new_try.attach(TEMPO_NEW_TRY, new_try);
+        }
+        else
+        {
+            Serial.println("[INIT] Connection to the internet router: OK");
+            digitalWrite(BLE_STATUS_LED_PIN, LOW);
+            digitalWrite(SOCKET_STATUS_LED_PIN, HIGH);
+
+            Serial.println("=>Socket mode");
+
+            NTPInit();
+            updateCurrentDateTime();
+            Serial.println("[INIT] NTP client (time): OK");
+
+            websocketioInit();
+            Serial.println("[INIT] WebSocketIo: OK");
+        }
+    }
+
+    sensorsInit();
+    //TODO: list sensors
+    Serial.println("[INIT] Sensors: OK");
+
+    Serial.printf("=============================\nSetup done\n=============================\n\n");
+}
+
+void loop()
+{
+    // If the flag to reset the module is up
+    if (resetModuleFlag)
+    {
+        //Clear the SPIFFS memory then reboot
+        resetSPIFFS();
+
+        Serial.println("Reboot..");
 
         ESP.restart();
     }
 
-    writeFile(SPIFFS, "/router_ids", "SFR_89B8&58baqh5jkg88xtvx7cih");
-
-    String rawRouterIds = readFile(SPIFFS, "/router_ids");
-
-    if (rawRouterIds == "")
-    {
-        Serial.println("No router Ids in memory => BLE mode");
-        ble_init();
-    }
-    else
-    {
-        parseRouterIds(rawRouterIds);
-
-        if (!connection_to_internet_router())
-        {
-            String s = "\nUnable to connect to the internet router\n";
-            s += "Timer config to retry later...\n";
-            Serial.printf("%s", s.c_str());
-
-            // start_new_try.attach(TEMPO_NEW_TRY, new_try);
-        }
-
-        if (is_internet_connected())
-        {
-            init_NTP();
-
-            if (timeClient.update())
-            {
-                formattedDate = timeClient.getFormattedDate();
-                Serial.println(formattedDate);
-                // res = true;
-            }
-
-            // Setup 'on' listen events
-            webSocket.on("connect", socket_Connected);
-            webSocket.on("event", socket_event);
-            webSocket.on("reply", messageEventHandler);
-            webSocket.begin(host, 8081, path);
-        }
-    }
-
-    Serial.println("setup done");
-}
-int i;
-uint64_t messageTimestamp;
-void loop()
-{
+    //BLE mode
     if (isBleON)
-    { //disconnecting
-        if (oldIsBleON == false)
-        {
-            String stringToStore = routerSsid + "&" + routerPassword;
-            writeFile(SPIFFS, "/router_ids", stringToStore.c_str());
+    {
+        digitalWrite(BLE_STATUS_LED_PIN, HIGH);
+        digitalWrite(SOCKET_STATUS_LED_PIN, LOW);
+
+        if (!oldIsBleON)
             oldIsBleON = true;
-        }
-        if (!deviceConnected && oldDeviceConnected)
+
+        //disconnecting
+        if (!isBLEConnected && oldIsBLEConnected)
         {
-            Serial.println("Disconected");
-            delay(500);                  // give the bluetooth stack the chance to get things ready
-            pServer->startAdvertising(); // restart advertising
-            Serial.println("start advertising");
-            oldDeviceConnected = deviceConnected;
+            Serial.println("BLE Disconnected");
+            delay(500); // give the bluetooth stack the chance to get things ready
+            // pServer->startAdvertising(); // restart advertising
+            // Serial.println("start advertising");
+            // oldIsBLEConnected = isBLEConnected;
+            Serial.println("Reboot..");
+
+            ESP.restart();
         }
         // connecting
-        if (deviceConnected && !oldDeviceConnected)
+        if (isBLEConnected && !oldIsBLEConnected)
         {
             // do stuff here on connecting
-            Serial.println("Connected");
-            oldDeviceConnected = deviceConnected;
+            Serial.println("BLE Connected");
+            oldIsBLEConnected = isBLEConnected;
         }
     }
+    //WebSocket mode
     else
     {
-        webSocket.loop();
-        uint64_t now = millis();
-        if (now - messageTimestamp > 4000)
+        //If it was in the BLE mode right before
+        if (oldIsBleON)
         {
-            messageTimestamp = now;
+            oldIsBleON = false;
 
-            year += 1;
-            float value = random(0, 50) / 100.0;
+            //TODO: move to BLE callback when success
+            String string2Store = routerSsid + "&" + routerPassword;
+            writeFile(SPIFFS, ROUTER_IDS_FILE_PATH, string2Store.c_str());
 
-            String dataToSend = "\"{'moduleId': '5e7a80125d33fe0d041ff8cb', 'sensorId': '5e81197a68819b45fce01000', 'data' : [ {'date' : '" + String(year) + "-04-03T21:00:00.000+00:00', 'value' : " + String(value) + "} ]}\"";
-            webSocket.emit("newDataFromModule", dataToSend.c_str());
+            delay(3000);
+            //Restart to initialize the WebSocket mode
+            ESP.restart();
+
+            // Serial.println("\t=> Socket mode");
+
+            // NTPInit();
+
+            // if (timeClient.update())
+            // {
+            //     currentDateTime = timeClient.getFormattedDate();
+            //     Serial.println(currentDateTime);
+            //     // res = true;
+            // }
+
+            // // Setup 'on' listen events
+            // webSocket.on("connect", socket_Connected);
+            // webSocket.on("event", socket_event);
+            // webSocket.on("reply", messageEventHandler);
+            // webSocket.begin(host, 8081, path);
+            // Serial.println("Socket initialized");
+            // /*****************Setup of the timer for measures*******************/
+            // Serial.println("Timer in interruption for new measures (init): ");
+
+            // startingDHT22MeasureTicker.attach(dhtMeasureTicker, raiseDHT22MeasureFlag);
+            // delay(500);
+        }
+
+        //Check if there is someting to do with the WebSocket
+        webSocket.loop();
+
+        //If the flag for a new measure is up => sensors reading
+        if (startingDHT22MeasureFlag)
+        {
+            startingDHT22MeasureTicker.detach(); //Disable interruption for new measures
+
+            int res = sendDataSensors2Server();
+
+            switch (res)
+            {
+            case 0:
+                Serial.println("Data sent to the server with Success!");
+                break;
+            case 1:
+                Serial.println("[ERROR] No internet connection: failed to send data sensors to the server! ");
+                break;
+            case 2:
+                Serial.println("[ERROR] Failed to get the current time! ");
+                break;
+            case 3:
+                //TODO: adapt for the specific sensor
+                Serial.println("[ERROR] Failed to read DHT22 sensor!");
+                break;
+            default:
+                Serial.println("[ERROR] Unkown error while sending data to the server!");
+                break;
+            }
+
+            startingDHT22MeasureTicker.attach(dhtMeasureTicker, raiseDHT22MeasureFlag); //Enable interruption for new measures
+
+            startingDHT22MeasureFlag = false; //Lower the flag
         }
     }
 }
+

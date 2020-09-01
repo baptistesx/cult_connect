@@ -1,44 +1,77 @@
 #include "initialisation.h"
 
-//Define NTP Client to get time
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP);
-//Date variables
-String formattedDate, dayStamp, timeStamp;
+int buttonState,                    //Reset button state
+    lastButtonState = HIGH;         //Initialisé à HIGH car pull-up, the previous reading from the input pin
+bool resetModuleFlag = false;      //When this flag is high => reset SPIFFS
+unsigned long lastDebounceTime = 0, //the last time the output pin was toggled
+    debounceDelay = 50;             //the debounce time; increase if the output flickers
+
 //Initialize the serial communication with the computer
-void serial_port_init(void)
+void serialPortInit(void)
 {
   Serial.begin(SERIAL_SPEED); //8 data bits, no parity, one stop bit
 }
 
-//Initialize the SPIFF memory
-bool SPIFF_init(void)
+//Reset button init
+//Button used in interruption to reinit eeprom memory that stores the current system configuration (internet router identifiers, thresholds for actuators ect..)
+void resetButtonInit(void)
 {
-  printf("==========SPIFF init==========\n");
+  pinMode(RESET_BUTTON_PIN, INPUT);
 
+  attachInterrupt(digitalPinToInterrupt(RESET_BUTTON_PIN), resetButtonInterrupt, CHANGE);
+}
+
+//TODO: effectuer le reset dans l'interruption car sinon obligé d'attendre la fin de l'init
+void resetButtonInterrupt()
+{
+  int pressedTime;
+  int reading = digitalRead(RESET_BUTTON_PIN);
+  if (reading != lastButtonState)
+  {
+    if (reading != LOW)
+      Serial.print("Bouton de reset appuyé: ");
+    lastDebounceTime = millis(); //reset the debouncing timer
+  }
+  pressedTime = (millis() - lastDebounceTime);
+  if (pressedTime > debounceDelay)
+  {
+    Serial.print(pressedTime);
+    Serial.println("ms");
+    if (pressedTime > 2000)
+      resetModuleFlag = true;
+    else
+      resetModuleFlag = false;
+  }
+}
+
+//Initialize the SPIFF memory
+bool SPIFFSInit(void)
+{
   if (!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED))
     return false;
-
-  printf("The SPIFF memory contains:\n");
-
-  listDir(SPIFFS, "/", 0);
-
-  printf("SPIFF init: OK\n\n");
 
   return true;
 }
 
-//Initialize a NTPClient to get date and time
-void init_NTP(void)
+void statusLedsInit()
 {
-  String s = "===========Time init (NTP)===========\n";
+  pinMode(BLE_STATUS_LED_PIN, OUTPUT);
+  pinMode(SOCKET_STATUS_LED_PIN, OUTPUT);
+}
 
+//Initialize a NTPClient to get date and time
+void NTPInit(void)
+{
   timeClient.begin();
   //Set offset time in seconds to adjust for your timezone, for example:
   //GMT +1 = 3600
   //GMT -1 = -3600
   //GMT 0 = 0
   timeClient.setTimeOffset(7200);
-  s += "\t\t\tTime init: OK\n\n";
-  Serial.println(s);
+}
+
+//Raise the flag for new measures
+void raiseDHT22MeasureFlag(void)
+{
+  startingDHT22MeasureFlag = true;
 }

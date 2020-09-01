@@ -1,8 +1,7 @@
-#include "spiff_functions.h"
+#include "spiffs_functions.h"
 
-//SPIFF use only to store the access point web page configuration
-//the next function are not used anymore (for now)
-//If used review them
+extern String routerSsid;
+extern String routerPassword;
 
 void listDir(fs::FS &fs, const char *dirname, uint8_t levels)
 {
@@ -39,44 +38,31 @@ void listDir(fs::FS &fs, const char *dirname, uint8_t levels)
 
 String readFile(fs::FS &fs, const char *path)
 {
-    Serial.printf("Reading file: %s\r\n", path);
-
     File file = fs.open(path);
     if (!file || file.isDirectory())
-    {
-        Serial.println("- failed to open file for reading");
-        return "";
-    }
 
-    Serial.println("- read from file:");
+        return "";
+
     String readString;
     while (file.available())
     {
-        // Serial.write(file.read());
         readString += (char)file.read();
     }
-
     return readString;
 }
 
-void writeFile(fs::FS &fs, const char *path, const char *message)
+bool writeFile(fs::FS &fs, const char *path, const char *message)
 {
-    Serial.printf("Writing file: %s\r\n", path);
-
     File file = fs.open(path, FILE_WRITE);
     if (!file)
-    {
-        Serial.println("- failed to open file for writing");
-        return;
-    }
+        return false;
     if (file.print(message))
     {
-        Serial.println("- file written");
+        file.flush();
+        return true;
     }
     else
-    {
-        Serial.println("- frite failed");
-    }
+        return false;
 }
 
 // void appendFile(fs::FS &fs, const char * path, const char * message){
@@ -179,4 +165,51 @@ void testFileIO(fs::FS &fs, const char *path)
     {
         Serial.println("- failed to open file for reading");
     }
+}
+
+void resetSPIFFS()
+{
+    deleteFile(SPIFFS, ROUTER_IDS_FILE_PATH);
+}
+
+int getRouterIdFromSPIFFS(void)
+{
+    String rawRouterIds = readFile(SPIFFS, ROUTER_IDS_FILE_PATH); // Format: ssid&password
+    if (rawRouterIds.length() < 5)
+    {
+        if (rawRouterIds == "")
+            deleteFile(SPIFFS, ROUTER_IDS_FILE_PATH);
+        return 1;
+    }
+    else
+    {
+        parseRouterIds(rawRouterIds);
+        return 2;
+    }
+}
+
+void parseRouterIds(String rawIds)
+{
+    bool isSsid = true;
+
+    clearRouterIds();
+
+    for (int i = 0; i < rawIds.length(); i++)
+    {
+        if (rawIds[i] == '&')
+            isSsid = false;
+        else
+        {
+            if (isSsid)
+                routerSsid += rawIds[i];
+            else
+                routerPassword += rawIds[i];
+        }
+    }
+}
+
+void clearRouterIds()
+{
+    routerSsid = "";
+    routerPassword = "";
 }

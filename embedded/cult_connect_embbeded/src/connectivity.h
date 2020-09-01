@@ -1,12 +1,23 @@
 #ifndef CONNECTIVITY_H
 #define CONNECTIVITY_H
 
-#include <Arduino.h>
 #include <WiFi.h>
-/***********Constantes***********/
+#include <Ticker.h> //Librairie pour interruptions
+#include <NTPClient.h>
+
 #define TIMEOUT 4
+
+extern WiFiUDP ntpUDP;
+
 extern bool isBleON;
-bool connection_to_internet_router(void);
-bool is_internet_connected(void);
+extern bool oldIsBleON;
+extern bool startingDHT22MeasureFlag;
+extern NTPClient timeClient;
+
+extern Ticker startingDHT22MeasureTicker;
+
+bool connection2InternetRouter(String ssid, String password);
+bool isInternetConnected(void);
+void updateCurrentDateTime(void);
 
 #endif

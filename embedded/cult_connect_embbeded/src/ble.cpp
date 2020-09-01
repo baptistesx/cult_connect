@@ -1,19 +1,25 @@
+//BLE: Bluetooth Low Energy
+
 #include "ble.h"
 
 BLECharacteristic *pCharacteristic = NULL;
 BLEServer *pServer = NULL;
 
+bool isBLEConnected = false;
+bool oldIsBLEConnected = false;
 
-String privateId = "";
-bool deviceConnected = false;
-bool oldDeviceConnected = false;
-std::string value = "0";
-std::string old_value = "0";
+std::string rawValueReceived = "0";
 uint32_t valToNotify = 0;
 uint32_t oldValToNotify = 0;
 
-void ble_init()
+bool oldIsBleON = false;
+bool isBleON = false;
+
+void BLEInit()
 {
+    digitalWrite(BLE_STATUS_LED_PIN, HIGH);
+    digitalWrite(SOCKET_STATUS_LED_PIN, LOW);
+
     BLEDevice::init(MODULE_NAME);
     pServer = BLEDevice::createServer();
     pServer->setCallbacks(new MyServerCallbacks());
@@ -26,7 +32,7 @@ void ble_init()
             BLECharacteristic::PROPERTY_WRITE |
             BLECharacteristic::PROPERTY_READ |
             BLECharacteristic::PROPERTY_NOTIFY);
-    // https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.client_characteristic_configuration.xml
+
     // Create a BLE Descriptor
     pCharacteristic->addDescriptor(new BLE2902());
 
@@ -39,4 +45,5 @@ void ble_init()
     pAdvertising->start();
 
     isBleON = true;
+    oldIsBleON = true;
 }
