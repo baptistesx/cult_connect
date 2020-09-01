@@ -1,29 +1,32 @@
 var mongoose = require("mongoose");
-var modules = require("./models/modulesSchema").modules;
-var users = require("./models/userSchema").users;
-var datas = require("./models/dataSchema").datas;
+var modules = require("../models/modulesSchema").modules;
+var users = require("../models/userSchema");
+var datas = require("../models/dataSchema").datas;
 var jwt = require("jsonwebtoken");
 var crypto = require("crypto");
-var sensors = require("./models/sensorsSchema").sensors;
+var sensors = require("../models/sensorsSchema").sensors;
 var validator = require("email-validator");
 var controler = require("./control_mod")
-var actuators = require("./models/actuatorsSchema").actuators;
+var actuators = require("../models/actuatorsSchema").actuators;
 const KEY = "m yincredibl y(!!1!11!)zpG6z2s8)Key'!";
 
 //Setup et connexion à la base de données MongoDb
-module.exports.connectDB = function () {
+function connectDB() {
   var mongoDB = "mongodb://localhost/monitoring";
   mongoose.connect(mongoDB, {
-    useUnifiedTopology: true,
-    useNewUrlParser: true,
-  });
+      useUnifiedTopology: true,
+      useNewUrlParser: true,
+    })
+    .then(() => console.log('Connexion à MongoDB réussie !'))
+    .catch(() => console.log('Connexion à MongoDB échouée !'));;
 
   //Get the default connection
   var db = mongoose.connection;
 
   //Bind connection to error event (to get notification of connection errors)
-  db.on("error", console.error.bind(console, "MongoDB connection error:"));
+  // db.on("error", console.error.bind(console, "MongoDB connection error:"));
 };
+connectDB()
 
 //Encryption du password reçu en paramètre
 encryptPwd = function (pwd, callback) {
@@ -129,8 +132,7 @@ module.exports.logUser = function (email, password, callback) {
   //Le password est encrypté
   encryptPwd(password, function (encPassword) {
     //Recherche d'un utilisateur qui match l'email et le password encrypté
-    users.findOne(
-      {
+    users.findOne({
         email: email,
         pwd: encPassword,
       },

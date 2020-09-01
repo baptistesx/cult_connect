@@ -1,5 +1,5 @@
-var users = require("./models/userSchema").users;
-var modules = require("./models/modulesSchema").modules;
+var users = require("../models/userSchema");
+var modules = require("../models/modulesSchema").modules;
 
 
 

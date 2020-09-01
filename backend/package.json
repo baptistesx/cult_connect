@@ -21,7 +21,7 @@
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.5.5",
     "mongoose": "^5.9.6",
-    "nodemon": "^2.0.2"
+    "nodemon": "^2.0.4"
   },
   "devDependencies": {
     "@shelf/jest-mongodb": "^1.2.2",

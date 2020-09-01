@@ -8,4 +8,4 @@ const usersSchema = new Schema({
   modules: [{type: ObjectId, ref: 'modules'}],
 });
 
-module.exports.users = mongoose.model("users", usersSchema);
+module.exports = mongoose.model("users", usersSchema);
