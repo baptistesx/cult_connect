@@ -1,16 +1,9 @@
-// routes module
-
-const express = require("express");
-const router = express.Router()
 var mongo = require("../../project_modules/mongo_mod");
 const KEY = "m yincredibl y(!!1!11!)zpG6z2s8)Key'!";
 var jwt = require("jsonwebtoken");
 var controler = require("../../project_modules/control_mod");
 
-
-
-//Route pour ajouter un module à l'utilisateur
-router.post("/addModule", function (req, res) {
+exports.addModule = (req, res, next) => {
     console.log("new request: /api/user/addModule");
     //Vérification du JWT (JSON Web Token)
     //Vérifie si le token match bien avec l'email
@@ -29,10 +22,9 @@ router.post("/addModule", function (req, res) {
             res.status(code).send(answer);
         }
     );
-});
+}
 
-//Route pour mise à jour du module d'id reçu en paramètre
-router.post("/updateModule", function (req, res) {
+exports.updateModule = (req, res, next) => {
     console.log("new request: /api/user/updateModule");
 
     var id = req.body.id;
@@ -67,10 +59,9 @@ router.post("/updateModule", function (req, res) {
             res.status(401).send(err)
         }
     });
-});
+}
 
-//Utilisateur "supprime" un module de sa liste => libérer module mais pas supprimer
-router.post("/removeModule", function (req, res) {
+exports.removeModule = (req, res, next) => {
     console.log("new request: /api/user/removeModule");
 
     //Vérification du JWT (JSON Web Token)
@@ -90,9 +81,9 @@ router.post("/removeModule", function (req, res) {
             res.status(401).send(err);
         }
     });
-});
+}
 
-router.get("/getModules", function (req, res) {
+exports.getModules = (req, res, next) => {
     console.log("new request: /api/user/getModules");
 
     //Vérification du JWT (JSON Web Token)
@@ -111,6 +102,4 @@ router.get("/getModules", function (req, res) {
             res.status(401).send(err);
         }
     });
-});
-
-module.exports = router
+}
