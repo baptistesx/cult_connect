@@ -167,7 +167,10 @@ class AddModuleForm extends StatelessWidget {
                                 },
                               ),
                               SizedBox(height: 30),
-                              Text("MODULE_" + device.name.substring(2, 7),
+                              Text(
+                                  "MODULE_" +
+                                      device.name
+                                          .substring(20, device.name.length),
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 25,
@@ -285,7 +288,7 @@ class AddModuleForm extends StatelessWidget {
                                           onPressed: () async {
                                             if (_addModuleFormKey.currentState
                                                 .validate()) {
-                                                  print(addModuleParams);
+                                              print(addModuleParams);
                                               List<int> val2Send =
                                                   _getIdsInListOfInt();
 
@@ -339,8 +342,8 @@ class AddModuleForm extends StatelessWidget {
   void dispatchSendRouterIds2Module(BuildContext context,
       BluetoothCharacteristic characteristic, List<int> val2Send) {
     addModuleParams.publicId = publicId;
-    addModuleParams.routerSsid= wifiParams.routerSsid;
-    addModuleParams.routerPassword= wifiParams.routerPassword;
+    addModuleParams.routerSsid = wifiParams.routerSsid;
+    addModuleParams.routerPassword = wifiParams.routerPassword;
     BlocProvider.of<ModuleBloc>(context).add(
         LaunchSendRouterIds2Module(characteristic, val2Send, addModuleParams));
   }

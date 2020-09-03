@@ -2,7 +2,9 @@
 
 extern String routerSsid;
 extern String routerPassword;
-
+extern String sensors[];
+extern String PRIVATE_ID;
+extern String MODULE_NAME;
 void listDir(fs::FS &fs, const char *dirname, uint8_t levels)
 {
     Serial.print(String("Listing directory: " + String(dirname) + "\r\n"));
@@ -208,8 +210,67 @@ void parseRouterIds(String rawIds)
     }
 }
 
-void clearRouterIds()
+void clearRouterIds(void)
 {
     routerSsid = "";
     routerPassword = "";
+}
+
+int readConfigFile(void)
+{
+    String rawConfig = readFile(SPIFFS, CONFIG_FILE_PATH); // Format: ssid&password
+    if (rawConfig.length() < 5)
+        return 1;
+    else
+        return parseConfigFile(rawConfig);
+}
+
+int parseConfigFile(String config)
+{
+    StaticJsonDocument<200> doc;
+
+    // StaticJsonDocument<N> allocates memory on the stack, it can be
+    // replaced by DynamicJsonDocument which allocates in the heap.
+    //
+    // DynamicJsonDocument doc(200);
+
+    // JSON input string.
+    //
+    // Using a char[], as shown here, enables the "zero-copy" mode. This mode uses
+    // the minimal amount of memory because the JsonDocument stores pointers to
+    // the input buffer.
+    // If you use another type of input, ArduinoJson must copy the strings from
+    // the input to the JsonDocument, so you need to increase the capacity of the
+    // JsonDocument.
+    int config_len = config.length() + 1;
+    char json[config_len];
+    config.toCharArray(json, config_len);
+
+    // Deserialize the JSON document
+    DeserializationError error = deserializeJson(doc, json);
+
+    // Test if parsing succeeds.
+    if (error)
+    {
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.c_str());
+        return 2;
+    }
+
+    // Fetch values.
+    //
+    // Most of the time, you can rely on the implicit casts.
+    // In other case, you can do doc["time"].as<long>();
+    const char *name = doc["moduleName"];
+    const char *id = doc["privateId"];
+    JsonArray sensorsJson = doc["sensors"];
+
+    MODULE_NAME = String(name);
+    PRIVATE_ID = String(id);
+
+    for (int i = 0; i < sensorsJson.size(); i++)
+    {
+        sensors[i] = sensorsJson[i].as<String>();
+    }
+    return 0;
 }

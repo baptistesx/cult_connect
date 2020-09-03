@@ -205,6 +205,12 @@ Icon mapDataTypeToIcon(String dataType, double size, Color color) {
         size: size,
         color: color,
       );
+    case 'luminosity':
+      return Icon(
+        MdiIcons.weatherSunny,
+        size: size,
+        color: color,
+      );
     default:
       throw DataTypeException();
   }

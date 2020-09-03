@@ -1,5 +1,5 @@
-#ifndef WEB_SOCKET_IO_H
-#define WEB_SOCKET_IO_H
+#ifndef WEB_SOCKET_IO_H_
+#define WEB_SOCKET_IO_H_
 
 #include "headers.h"
 

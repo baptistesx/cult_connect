@@ -2,10 +2,11 @@
 
 int buttonState,                    //Reset button state
     lastButtonState = HIGH;         //Initialisé à HIGH car pull-up, the previous reading from the input pin
-bool resetModuleFlag = false;      //When this flag is high => reset SPIFFS
+bool resetModuleFlag = false;       //When this flag is high => reset SPIFFS
 unsigned long lastDebounceTime = 0, //the last time the output pin was toggled
     debounceDelay = 50;             //the debounce time; increase if the output flickers
-
+String PRIVATE_ID = "";
+String MODULE_NAME = "";
 //Initialize the serial communication with the computer
 void serialPortInit(void)
 {
@@ -49,6 +50,7 @@ bool SPIFFSInit(void)
 {
   if (!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED))
     return false;
+  listDir(SPIFFS, "/", 0);
 
   return true;
 }
@@ -74,4 +76,11 @@ void NTPInit(void)
 void raiseDHT22MeasureFlag(void)
 {
   startingDHT22MeasureFlag = true;
+}
+
+//Raise the flag for new measures
+void raiseBrightnessMeasureFlag(void)
+{
+  Serial.println("flag tsl");
+  startingBrightnessMeasureFlag = true;
 }

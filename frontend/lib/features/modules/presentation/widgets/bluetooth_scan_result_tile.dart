@@ -8,7 +8,7 @@ class ScanResultTile extends StatelessWidget {
   final VoidCallback onTap;
 
   Widget _buildTitle(BuildContext context) => Text(
-        "MODULE_"+result.device.name.substring(2,7),
+        "MODULE_" + result.device.name.substring(20, result.device.name.length),
         style: TextStyle(color: Colors.white),
       );
 

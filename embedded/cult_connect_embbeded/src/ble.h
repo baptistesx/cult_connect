@@ -1,5 +1,5 @@
-#ifndef BLE_H
-#define BLE_H
+#ifndef BLE_H_
+#define BLE_H_
 
 #include "initialisation.h"
 // #include "spiffs_functions.h"
@@ -9,11 +9,14 @@
 #include <BLEUtils.h>
 #include <BLEServer.h>
 #include <BLE2902.h>
-
-#define PRIVATE_ID "123"
+extern String PRIVATE_ID;
+extern String MODULE_NAME;
+//TODO: change following the module
+// #define PRIVATE_ID "456"
 
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+
 
 extern BLECharacteristic *pCharacteristic;
 extern BLEServer *pServer;

@@ -21,10 +21,21 @@ void setup()
         ESP.restart();
     }
     Serial.println("[INIT] SPIFFS: OK");
-
-    //TODO: to delete
-    // writeFile(SPIFFS, ROUTER_IDS_FILE_PATH, "SFR_89B8&58baqh5jkg88xtvx7cih");
-    // deleteFile(SPIFFS, ROUTER_IDS_FILE_PATH);
+    int res = readConfigFile();
+    switch (res)
+    {
+    case 0:
+        Serial.println("[INIT] Module configuration from config.json file: OK");
+        break;
+    case 1:
+        Serial.println("[ERROR] Module configuration from config.json file: KO, no config file found!");
+        break;
+    case 2:
+        Serial.println("[ERROR] Module configuration from config.json file: KO, error while parsing the config file!");
+        break;
+    default:
+        break;
+    }
 
     if (getRouterIdFromSPIFFS() == 1)
     {
@@ -58,12 +69,12 @@ void setup()
 
             websocketioInit();
             Serial.println("[INIT] WebSocketIo: OK");
+
+            sensorsInit();
+            //TODO: list sensors
+            Serial.println("[INIT] Sensors: OK");
         }
     }
-
-    sensorsInit();
-    //TODO: list sensors
-    Serial.println("[INIT] Sensors: OK");
 
     Serial.printf("=============================\nSetup done\n=============================\n\n");
 }
@@ -158,7 +169,7 @@ void loop()
         {
             startingDHT22MeasureTicker.detach(); //Disable interruption for new measures
 
-            int res = sendDataSensors2Server();
+            int res = sendDataSensors2Server(1);
 
             switch (res)
             {
@@ -184,6 +195,36 @@ void loop()
 
             startingDHT22MeasureFlag = false; //Lower the flag
         }
+
+        if (startingBrightnessMeasureFlag)
+        {
+            startingBrightnessMeasureTicker.detach(); //Disable interruption for new measures
+
+            int res = sendDataSensors2Server(2);
+
+            switch (res)
+            {
+            case 0:
+                Serial.println("Data sent to the server with Success!");
+                break;
+            case 1:
+                Serial.println("[ERROR] No internet connection: failed to send data sensors to the server! ");
+                break;
+            case 2:
+                Serial.println("[ERROR] Failed to get the current time! ");
+                break;
+            case 3:
+                //TODO: adapt for the specific sensor
+                Serial.println("[ERROR] Failed to read TSL2561 sensor!");
+                break;
+            default:
+                Serial.println("[ERROR] Unkown error while sending data to the server!");
+                break;
+            }
+
+            startingBrightnessMeasureTicker.attach(brightnessMeasureTicker, raiseBrightnessMeasureFlag); //Enable interruption for new measures
+
+            startingBrightnessMeasureFlag = false; //Lower the flag
+        }
     }
 }
-

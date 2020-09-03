@@ -1,9 +1,11 @@
 #include "connectivity.h"
 
-extern bool startingDHT22MeasureFlag;
+// extern bool startingDHT22MeasureFlag;
+// extern bool startingBrightnessMeasureFlag;
 extern bool oldIsBleON;
 extern bool isBleON;
 extern Ticker startingDHT22MeasureTicker;
+extern Ticker startingBrightnessMeasureTicker;
 
 String routerSsid = "";
 String routerPassword = "";

@@ -20,7 +20,7 @@ void BLEInit()
     digitalWrite(BLE_STATUS_LED_PIN, HIGH);
     digitalWrite(SOCKET_STATUS_LED_PIN, LOW);
 
-    BLEDevice::init(MODULE_NAME);
+    BLEDevice::init(MODULE_NAME.c_str());
     pServer = BLEDevice::createServer();
     pServer->setCallbacks(new MyServerCallbacks());
 

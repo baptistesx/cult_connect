@@ -632,7 +632,7 @@ io.sockets.on('connection', function (socket) {
   socket.on('identification', function (name) {
     socket.name = name
     //Le client est un module
-    if (name.split('_')[0] == "MODULE") {
+    if (name.split('_')[0] == "M") {
       mongo.getModuleOwnerById(name.split('_')[1], function (user) {
         //Le module rejoint la room correspondant a l'id de
         // son utilisateur
@@ -645,18 +645,15 @@ io.sockets.on('connection', function (socket) {
       socket.on('newDataFromModule', function (dataReceived) {
         var res = dataReceived.replace(/'/g, "\"")
         var dataParsed = JSON.parse(res)
-        
         sensors.findOne({
           _id: dataParsed.sensorId
         }, function (err, sensor) {
-          console.log(sensor)
           for (i = 0; i < dataParsed.data.length; i++) {
             console.log(dataParsed.data[i])
             sensor.data.push(dataParsed.data[i])
           }
           //Sauvegarde de la data en base de données
           sensor.save(function (err, sensor) {
-            console.log(sensor)
             getSensorData(dataParsed.moduleId, sensor, function (dataToSend) {
               //Broadcast a toutes les sockets de la room
               io.to(userId).emit("appNewData", dataToSend)

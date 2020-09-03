@@ -8,7 +8,14 @@ SocketIoClient webSocket;
 void socket_Connected(const char *payload, size_t length)
 {
     Serial.println("Socket.IO Connected!");
-    char *id = "\"MODULE_5e7a80125d33fe0d041ff8cb\"";
+    String tempId = "\"";
+    tempId += String(MODULE_NAME);
+    tempId += "\"";
+
+    int tempId_len = tempId.length() + 1;
+    char id[tempId_len];
+    tempId.toCharArray(id, tempId_len);
+
     webSocket.emit("identification", id);
 }
 

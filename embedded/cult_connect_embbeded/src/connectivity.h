@@ -1,5 +1,5 @@
-#ifndef CONNECTIVITY_H
-#define CONNECTIVITY_H
+#ifndef CONNECTIVITY_H_
+#define CONNECTIVITY_H_
 
 #include <WiFi.h>
 #include <Ticker.h> //Librairie pour interruptions
@@ -11,10 +11,11 @@ extern WiFiUDP ntpUDP;
 
 extern bool isBleON;
 extern bool oldIsBleON;
-extern bool startingDHT22MeasureFlag;
+// extern bool startingDHT22MeasureFlag;
 extern NTPClient timeClient;
 
 extern Ticker startingDHT22MeasureTicker;
+extern Ticker startingBrightnessMeasureTicker;
 
 bool connection2InternetRouter(String ssid, String password);
 bool isInternetConnected(void);

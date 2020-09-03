@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "sensors_ids.h"
 #include "initialisation.h"
 #include "spiffs_functions.h"
 #include "ble.h"

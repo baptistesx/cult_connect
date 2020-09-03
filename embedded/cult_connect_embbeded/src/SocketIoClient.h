@@ -1,5 +1,5 @@
-#ifndef __SOCKET_IO_CLIENT_H__
-#define __SOCKET_IO_CLIENT_H__
+#ifndef __SOCKET_IO_CLIENT_H_
+#define __SOCKET_IO_CLIENT_H_
 
 #include <Arduino.h>
 #include <map>
