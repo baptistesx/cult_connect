@@ -1,71 +1,23 @@
 #include "monitoring.h" //Contains all the sensors functions prototypes
 
-bool startingDHT22MeasureFlag = false;
-bool startingBrightnessMeasureFlag = false;
-String sensors[NUMBER_OF_SENSORS_GLOBALLY];
-
-DHT dht(DHTPIN, DHTTYPE); //Sensor DHT22 object
-
-/**********Interruption**********/
-Ticker startingDHT22MeasureTicker;
-Ticker startingBrightnessMeasureTicker;
-
-int dhtMeasureTicker = 10;
-int brightnessMeasureTicker = 20;
-float dht22CelciusTemperature, dht22Humidity, tsl2561BrightnessLux;
-
-Adafruit_TSL2561_Unified brightness_sensor = Adafruit_TSL2561_Unified(TSL2561_ADDR_FLOAT, 12345);
-
-void sensorsInit(void)
-{
-  int dht22SensorIndex = 1;
-  for (int i = 0; i < NUMBER_OF_SENSORS_GLOBALLY; i++)
-  {
-    String sensor = sensors[i];
-    if (sensor == "")
-      break;
-
-    if ((sensor == DHT22_TEMPERATURE_ID || sensor == DHT22_HUMIDITY_ID) && dht22SensorIndex == 1)
-    {
-      Serial.println("le module contient un dht22");
-      temperatureHumiditySensorInit();
-
-      dht22SensorIndex++;
-    }
-    else if (sensor == TSL2561_ID)
-    {
-      Serial.println("le module contient un tsl2561");
-      int res = brightnessSensorInit();
-      if (res == 1)
-      {
-        //TODO: handle error
-        /* There was a problem detecting the TSL2561 ... check your connections */
-        Serial.print("Ooops, no TSL2561 detected ... Check your wiring or I2C ADDR!");
-      }
-      else
-      {
-      }
-    }
-  }
-}
-
 /**************Temperature/Humidity sensor (DHT22) functions**************/
-bool measureTemperatureHumidity(void)
+bool measureTemperatureHumidity(float *celciusTemperatureFromDHT22, float *humidityFromDHT22)
 { //Temperature/Humidity measure function
   /*  Reading temperature or humidity takes about 250 milliseconds!
     Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)*/
-  dht22Humidity = dht.readHumidity();
+    //TODO: to check
+  // *humidityFromDHT22 = humidityTemperatureSensor.readHumidity();
   //Read temperature as Celsius (the default)
-  dht22CelciusTemperature = dht.readTemperature();
+  // *celciusTemperatureFromDHT22 = humidityTemperatureSensor.readTemperature();
 
   //Check if any reads failed and exit early (to try again).
-  if (isnan(dht22Humidity) || isnan(dht22CelciusTemperature))
+  if (isnan(*humidityFromDHT22) || isnan(*celciusTemperatureFromDHT22))
     return false;
 
   return true;
 }
 
-int sendDataSensors2Server(int numSensor)
+int sendSensorsData2Server(int numSensor)
 {
   if (isInternetConnected())
   {
@@ -75,14 +27,16 @@ int sendDataSensors2Server(int numSensor)
       {
       case 1:
       {
-        bool res = measureTemperatureHumidity();
+        float celciusTemperatureFromDHT22;
+        float humidityFromDHT22;
+        bool res = measureTemperatureHumidity(&celciusTemperatureFromDHT22, &humidityFromDHT22);
 
         if (res)
         {
-          currentDateTime = timeClient.getFormattedDate();
-          String dataToSend = "\"{'moduleId': '" + MODULE_NAME.substring(2, MODULE_NAME.length()-1) + "', 'sensorId': '5e81197a68819b45fce01000', 'data' : [ {'date' : '" + currentDateTime + "', 'value' : " + String(dht22CelciusTemperature) + "} ]}\"";
+          String currentDateTime = timeClient.getFormattedTime();
+          String dataToSend = "\"{'moduleId': '" + moduleConfig.getId() + "', 'sensorId': '5e81197a68819b45fce01000', 'data' : [ {'date' : '" + currentDateTime + "', 'value' : " + String(celciusTemperatureFromDHT22) + "} ]}\"";
           webSocket.emit("newDataFromModule", dataToSend.c_str());
-          dataToSend = "\"{'moduleId': '5e7a80125d33fe0d041ff8cb', 'sensorId': '5e81197a68819b45fce01001', 'data' : [ {'date' : '" + currentDateTime + "', 'value' : " + String(dht22Humidity) + "} ]}\"";
+          dataToSend = "\"{'moduleId': '" + moduleConfig.getId() + "', 'sensorId': '5e81197a68819b45fce01001', 'data' : [ {'date' : '" + currentDateTime + "', 'value' : " + String(humidityFromDHT22) + "} ]}\"";
           webSocket.emit("newDataFromModule", dataToSend.c_str());
 
           return 0;
@@ -93,12 +47,13 @@ int sendDataSensors2Server(int numSensor)
       break;
       case 2:
       {
-        bool res = measureBrightness();
+        float brightnessLuxFromTSL2561;
+        bool res = measureBrightness(&brightnessLuxFromTSL2561);
 
         if (res)
         {
-          currentDateTime = timeClient.getFormattedDate();
-          String dataToSend = "\"{'moduleId': '" + MODULE_NAME.substring(2, MODULE_NAME.length() - 1) + "', 'sensorId': '5f4ec59b1f305e32f8f3e519', 'data' : [ {'date' : '" + currentDateTime + "', 'value' : " + String(tsl2561BrightnessLux) + "} ]}\"";
+          String currentDateTime = timeClient.getFormattedDate();
+          String dataToSend = "\"{'moduleId': '" + moduleConfig.getId() + "', 'sensorId': '5f4ec59b1f305e32f8f3e519', 'data' : [ {'date' : '" + currentDateTime + "', 'value' : " + String(brightnessLuxFromTSL2561) + "} ]}\"";
           webSocket.emit("newDataFromModule", dataToSend.c_str());
 
           return 0;
@@ -109,6 +64,7 @@ int sendDataSensors2Server(int numSensor)
       break;
       default:
         Serial.println("Unknown numSensor");
+        return 4;
         break;
       }
     }
@@ -119,89 +75,47 @@ int sendDataSensors2Server(int numSensor)
     return 1;
 }
 
-//Initialize Temperature/Humidity sensor (DHT22)
-void temperatureHumiditySensorInit(void)
+//Raise the flag for new measures
+void raiseHumidityTemperatureMeasureFlag(void)
 {
-  dht.begin();
-  startingDHT22MeasureTicker.attach(dhtMeasureTicker, raiseDHT22MeasureFlag);
+  // startingHumidityTemperatureMeasureFlag = true;
 }
 
-//Initialize brightness sensor (TSL2561)
-int brightnessSensorInit(void)
+//Raise the flag for new measures
+void raiseBrightnessMeasureFlag(void)
 {
-  //use brightness_sensor.begin() to default to Wire,
-  //brightness_sensor.begin(&Wire2) directs api to use Wire2, etc.
-  if (!brightness_sensor.begin())
-  {
-    return 1;
-  }
-
-  /* Display some basic information on this sensor */
-  // sensor_t b_sensor;
-  // brightness_sensor.getSensor(&b_sensor);
-  // Serial.println("------------------------------------");
-  // Serial.print("Brightness Sensor:       ");
-  // Serial.println(b_sensor.name);
-  // Serial.print("Driver Ver:   ");
-  // Serial.println(b_sensor.version);
-  // Serial.print("Unique ID:    ");
-  // Serial.println(b_sensor.sensor_id);
-  // Serial.print("Max Value:    ");
-  // Serial.print(b_sensor.max_value);
-  // Serial.println(" lux");
-  // Serial.print("Min Value:    ");
-  // Serial.print(b_sensor.min_value);
-  // Serial.println(" lux");
-  // Serial.print("Resolution:   ");
-  // Serial.print(b_sensor.resolution);
-  // Serial.println(" lux");
-  // Serial.println("------------------------------------");
-  // Serial.println("");
-  delay(500);
-
-  /* Setup the sensor gain and integration time */
-  /* You can also manually set the gain or enable auto-gain support */
-  // brightness_sensor.setGain(TSL2561_GAIN_1X);      /* No gain ... use in bright light to avoid sensor saturation */
-  // brightness_sensor.setGain(TSL2561_GAIN_16X);     /* 16x gain ... use in low light to boost sensitivity */
-  brightness_sensor.enableAutoRange(true); /* Auto-gain ... switches automatically between 1x and 16x */
-
-  /* Changing the integration time gives you better sensor resolution (402ms = 16-bit data) */
-  brightness_sensor.setIntegrationTime(TSL2561_INTEGRATIONTIME_13MS); /* fast but low resolution */
-  // brightness_sensor.setIntegrationTime(TSL2561_INTEGRATIONTIME_101MS);  /* medium resolution and speed   */
-  // brightness_sensor.setIntegrationTime(TSL2561_INTEGRATIONTIME_402MS);  /* 16-bit data but slowest conversions */
-  startingBrightnessMeasureTicker.attach(brightnessMeasureTicker, raiseBrightnessMeasureFlag);
-
-  return 0;
+  Serial.println("flag tsl");
+  // startingBrightnessMeasureFlag = true;
 }
 
-bool measureBrightness(void)
+bool measureBrightness(float *brightnessLuxFromTSL2561)
 { //Brightness measure functions
-  int i = 0;
-  do
-  {
-    /* Get a new sensor event */
-    sensors_event_t brightness_sensor_event;
-    brightness_sensor.getEvent(&brightness_sensor_event);
+  // int i = 0;
+  // do
+  // {
+  //   /* Get a new sensor event */
+  //   sensors_event_t brightnessSensorEvent;
+  //   brightnessSensor.getEvent(&brightnessSensorEvent);
 
-    if (brightness_sensor_event.light)
-    {
-      tsl2561BrightnessLux = brightness_sensor_event.light;
-      return true;
-    }
-    else
-    {
-      /* If brightness_sensor_event.light = 0 lux the sensor is probably saturated
-         and no reliable data could be generated! */
-      Serial.println("Réinitialisation du light sensor");
-      int res = brightnessSensorInit();
-      if (res == 1)
-      {
-        //TODO: handle error
-      }
-      i++;
-      delay(1000);
-    }
-  } while (i < 5);
-  tsl2561BrightnessLux = 0;
+  //   if (brightnessSensorEvent.light)
+  //   {
+  //     *brightnessLuxFromTSL2561 = brightnessSensorEvent.light;
+  //     return true;
+  //   }
+  //   else
+  //   {
+  //     /* If brightnessSensorEvent.light = 0 lux the sensor is probably saturated
+  //        and no reliable data could be generated! */
+  //     Serial.println("Réinitialisation du light sensor");
+  //     int res = brightnessSensorInit();
+  //     if (res == 1)
+  //     {
+  //       //TODO: handle error
+  //     }
+  //     i++;
+  //     delay(1000);
+  //   }
+  // } while (i < 5);
+  // *brightnessLuxFromTSL2561 = 0;
   return false;
 }

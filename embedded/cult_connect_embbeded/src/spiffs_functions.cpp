@@ -1,10 +1,5 @@
 #include "spiffs_functions.h"
 
-extern String routerSsid;
-extern String routerPassword;
-extern String sensors[];
-extern String PRIVATE_ID;
-extern String MODULE_NAME;
 void listDir(fs::FS &fs, const char *dirname, uint8_t levels)
 {
     Serial.print(String("Listing directory: " + String(dirname) + "\r\n"));
@@ -69,7 +64,6 @@ bool writeFile(fs::FS &fs, const char *path, const char *message)
 
 // void appendFile(fs::FS &fs, const char * path, const char * message){
 //    Serial.printf("Appending to file: %s\r\n", path);
-
 //    File file = fs.open(path, FILE_APPEND);
 //    if(!file){
 //        Serial.println("- failed to open file for appending");
@@ -171,30 +165,78 @@ void testFileIO(fs::FS &fs, const char *path)
 
 void resetSPIFFS()
 {
-    deleteFile(SPIFFS, ROUTER_IDS_FILE_PATH);
-}
+    File file = SPIFFS.open(CONFIG_FILE_PATH_IN_SPIFFS, FILE_WRITE);
 
-int getRouterIdFromSPIFFS(void)
+    const size_t capacity = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(9);
+    DynamicJsonDocument doc(3000);
+
+    doc["routerSSID"] = "";
+    doc["routerPassword"] = "";
+    doc["id"] = moduleConfig.getId();
+    doc["privateId"] = moduleConfig.getPrivateId();
+    doc["resetButtonPin"] = moduleConfig.getResetButtonPin();
+    doc["bleStatusLedPin"] = moduleConfig.getBleStatusLedPin();
+    doc["socketStatusLedPin"] = moduleConfig.getSocketStatusLedPin();
+    doc["nbSensors"] = moduleConfig.getNbSensors();
+
+    JsonArray sensors = doc.createNestedArray("sensors");
+
+    for (int i = 0; i < moduleConfig.getNbSensors(); i++)
+    {
+        Serial.print("for loop: ");
+        Serial.println(i);
+        JsonObject sensor = sensors.createNestedObject();
+
+        char charBuf[50];
+        moduleConfig.sensors[i]->getId().toCharArray(charBuf, 50);
+
+        sensor["id"] = moduleConfig.sensors[i]->getId();
+        sensor["type"] = moduleConfig.sensors[i]->getType();
+        sensor["intervalMeasure"] = moduleConfig.sensors[i]->getMeasureInterval();
+
+        if (String(moduleConfig.sensors[i]->getType()) == "temperature")
+        {
+            sensor["pin"] = moduleConfig.sensors[i]->getDhtPin();
+            sensor["dhtType"] = moduleConfig.sensors[i]->getDhtType();
+            Serial.println(sensor["pin"].as<int>());
+            Serial.println(sensor["dhtType"].as<int>());
+        }
+        if (String(moduleConfig.sensors[i]->getType()) == "luminosity")
+        {
+            Serial.println("luminosity sensor");
+        }
+    }
+
+    // Serialize JSON to file
+    if (serializeJson(doc, file) == 0)
+    {
+        Serial.println(F("Failed to write to file"));
+    }
+}
+// }
+
+// The internet router ids are store in ROUTER_IDS_FILE_PATH_IN_SPIFFS
+int readRouterIdsFile(String *routerSsid, String *routerPassword)
 {
-    String rawRouterIds = readFile(SPIFFS, ROUTER_IDS_FILE_PATH); // Format: ssid&password
+    String rawRouterIds = readFile(SPIFFS, ROUTER_IDS_FILE_PATH_IN_SPIFFS); // Format: ssid&password
     if (rawRouterIds.length() < 5)
     {
         if (rawRouterIds == "")
-            deleteFile(SPIFFS, ROUTER_IDS_FILE_PATH);
+            deleteFile(SPIFFS, ROUTER_IDS_FILE_PATH_IN_SPIFFS);
         return 1;
     }
     else
     {
-        parseRouterIds(rawRouterIds);
+        parseRouterIds(rawRouterIds, routerSsid, routerPassword);
         return 2;
     }
 }
 
-void parseRouterIds(String rawIds)
+void parseRouterIds(String rawIds, String *routerSsid, String *routerPassword)
 {
     bool isSsid = true;
 
-    clearRouterIds();
+    // clearRouterIds();
 
     for (int i = 0; i < rawIds.length(); i++)
     {
@@ -203,32 +245,29 @@ void parseRouterIds(String rawIds)
         else
         {
             if (isSsid)
-                routerSsid += rawIds[i];
+                *routerSsid += rawIds[i];
             else
-                routerPassword += rawIds[i];
+                *routerPassword += rawIds[i];
         }
     }
 }
 
-void clearRouterIds(void)
+// The router config is store in the SPIFFS memory CONFIG_FILE_PATH_IN_SPIFFS
+// The config is composed of the MODULE_NAME and the different sensors/actuators the module owns
+int readConfigFileFromSPIFFS(void)
 {
-    routerSsid = "";
-    routerPassword = "";
-}
-
-int readConfigFile(void)
-{
-    String rawConfig = readFile(SPIFFS, CONFIG_FILE_PATH); // Format: ssid&password
+    String rawConfig = readFile(SPIFFS, CONFIG_FILE_PATH_IN_SPIFFS); // Format: json
     if (rawConfig.length() < 5)
         return 1;
     else
-        return parseConfigFile(rawConfig);
+        return parseConfig(rawConfig);
 }
 
-int parseConfigFile(String config)
+int parseConfig(String config)
 {
-    StaticJsonDocument<200> doc;
-
+    const size_t capacity = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(9) + 310;
+    DynamicJsonDocument doc(capacity);
+    // const char *json = "{\"routerSSID\":\"Martin Router King\",\"routerPassword\":\"phelmaRPZ204\",\"id\":\"5e7a80125d33fe0d041ff8cb\",\"privateId\":\"123\",\"resetButtonPin\":32,\"bleStatusLedPin\":13,\"socketStatusLedPin\":12,\"nbSensors\":2,\"sensors\":[{\"id\":\"5e81197a68819b45fce01000\",\"type\":\"temperature\",\"pin\":4,\"dhtType\":22,\"intervalMeasure\":5000},{\"id\":\"5f4ec59b1f305e32f8f3e519\",\"type\":\"luminosity\",\"intervalMeasure\":10000}]}";
     // StaticJsonDocument<N> allocates memory on the stack, it can be
     // replaced by DynamicJsonDocument which allocates in the heap.
     //
@@ -242,10 +281,11 @@ int parseConfigFile(String config)
     // If you use another type of input, ArduinoJson must copy the strings from
     // the input to the JsonDocument, so you need to increase the capacity of the
     // JsonDocument.
+    /////////
     int config_len = config.length() + 1;
     char json[config_len];
     config.toCharArray(json, config_len);
-
+    /////////
     // Deserialize the JSON document
     DeserializationError error = deserializeJson(doc, json);
 
@@ -261,16 +301,41 @@ int parseConfigFile(String config)
     //
     // Most of the time, you can rely on the implicit casts.
     // In other case, you can do doc["time"].as<long>();
-    const char *name = doc["moduleName"];
-    const char *id = doc["privateId"];
-    JsonArray sensorsJson = doc["sensors"];
+    moduleConfig.setRouterInfo(doc["routerSSID"], doc["routerPassword"]);
+    moduleConfig.setModuleInfo(doc["id"], doc["privateId"]);
+    moduleConfig.setResetButtonPin(doc["resetButtonPin"]);
+    moduleConfig.setBleStatusLedPin(doc["bleStatusLedPin"]);
+    moduleConfig.setSocketStatusLedPin(doc["socketStatusLedPin"]);
+    moduleConfig.setSensorsSize(doc["nbSensors"]);
 
-    MODULE_NAME = String(name);
-    PRIVATE_ID = String(id);
+    JsonObject sensors_0 = doc["sensors"][0];
+    const char *sensors_0_id = sensors_0["id"];                   // "5e81197a68819b45fce01000"
+    const char *sensors_0_type = sensors_0["type"];               // "temperature"
+    int sensors_0_pin = sensors_0["pin"];                         // 4
+    int sensors_0_dhtType = sensors_0["dhtType"];                 // 22
+    int sensors_0_intervalMeasure = sensors_0["intervalMeasure"]; // 5000
 
-    for (int i = 0; i < sensorsJson.size(); i++)
+    for (int i = 0; i < moduleConfig.getNbSensors(); i++)
     {
-        sensors[i] = sensorsJson[i].as<String>();
+        JsonObject sensor = doc["sensors"][i];
+        const char *sensor_type = sensor["type"];               // "temperature"
+        const char *sensor_id = sensor["id"];                   // "5e81197a68819b45fce01000"
+        int sensor_intervalMeasure = sensor["intervalMeasure"]; // 5000
+
+        if (String(sensor_type) == "temperature")
+        {
+            int sensor_pin = sensor["pin"];         // 4
+            int sensor_dhtType = sensor["dhtType"]; // 22
+
+            Serial.println("temperature sensor");
+            moduleConfig.sensors.push_back(new AirTemperatureSensor(sensor_dhtType, sensor_pin, String(sensor_id), String(sensor_type), sensor_intervalMeasure));
+        }
+        if (String(sensor_type) == "luminosity")
+        {
+            Serial.println("luminosity sensor");
+
+            moduleConfig.sensors.push_back(new BrightnessSensor(sensor["id"].as<String>(), sensor["type"].as<String>(), sensor["intervalMeasure"]));
+        }
     }
     return 0;
 }
