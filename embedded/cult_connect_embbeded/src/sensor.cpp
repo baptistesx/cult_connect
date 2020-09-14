@@ -118,7 +118,6 @@ void Sensor::update()
             Serial.println("[ERROR] Failed to get the current time! ");
             break;
         case 3:
-            //TODO: adapt for the specific sensor
             Serial.println("[ERROR] Failed to read " + this->getType() + " sensor!");
             break;
         case 4:
@@ -186,18 +185,18 @@ uint32_t Sensor::counter()
 }
 
 // TODO: put specific sensors classes in different files?
-AirTemperatureSensor::AirTemperatureSensor(int dhtType, int pin, String id, String type, uint32_t timer, uint32_t repeat, resolution_t resolution) : Sensor(id, type, timer, repeat, resolution), sensor(pin, dhtType)
+AirTemperatureSensor::AirTemperatureSensor(DHT *dhtSensor, int dhtType, int pin, String id, String type, uint32_t timer, uint32_t repeat, resolution_t resolution) : Sensor(id, type, timer, repeat, resolution)
 {
+    this->sensor = dhtSensor;
     this->dhtPin = pin;
     this->dhtType = dhtType;
-    this->sensor.begin();
 }
 
 float AirTemperatureSensor::getMeasure(void)
 {
     /*  Reading temperature or humidity takes about 250 milliseconds!
     Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)*/
-    float temperature = this->sensor.readTemperature();
+    float temperature = this->sensor->readTemperature();
     return isnan(temperature) ? -1 : temperature;
 }
 int AirTemperatureSensor::getDhtPin(void) { return this->dhtPin; }
@@ -205,6 +204,29 @@ int AirTemperatureSensor::getDhtPin(void) { return this->dhtPin; }
 int AirTemperatureSensor::getDhtType(void) { return this->dhtType; }
 
 String AirTemperatureSensor::toString(void)
+{
+    return String("type: " + this->getType() + "; measureInterval: " + String(this->getMeasureInterval()) + " ; id: " + this->getId());
+}
+
+AirHumiditySensor::AirHumiditySensor(DHT *dhtSensor, int dhtType, int pin, String id, String type, uint32_t timer, uint32_t repeat, resolution_t resolution) : Sensor(id, type, timer, repeat, resolution)
+{
+    this->sensor = dhtSensor;
+    this->dhtPin = pin;
+    this->dhtType = dhtType;
+}
+
+float AirHumiditySensor::getMeasure(void)
+{
+    /*  Reading temperature or humidity takes about 250 milliseconds!
+    Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)*/
+    float humidity = this->sensor->readHumidity();
+    return isnan(humidity) ? -1 : humidity;
+}
+int AirHumiditySensor::getDhtPin(void) { return this->dhtPin; }
+
+int AirHumiditySensor::getDhtType(void) { return this->dhtType; }
+
+String AirHumiditySensor::toString(void)
 {
     return String("type: " + this->getType() + "; measureInterval: " + String(this->getMeasureInterval()) + " ; id: " + this->getId());
 }

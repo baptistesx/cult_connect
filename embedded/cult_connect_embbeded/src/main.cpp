@@ -12,7 +12,7 @@ BleInstance bleInstance;
 
 // Instance containing the module configuration
 Config moduleConfig;
-
+DHT *dhtTest;
 //First executed function when the module starts <=> initialisation
 void setup()
 {
@@ -93,7 +93,12 @@ void setup()
             Serial.println("[INIT] Sensors: OK");
         }
     }
-
+    for (int i = 0; i < moduleConfig.getNbSensors(); i++)
+    {
+        Serial.print("mesure  ");
+        Serial.print(moduleConfig.sensors[i]->getType());
+        Serial.println(moduleConfig.sensors[i]->getMeasure());
+    }
     Serial.printf("=============================\nSetup done\n=============================\n\n");
 }
 

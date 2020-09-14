@@ -6,7 +6,7 @@
     "resetButtonPin": 32,
     "bleStatusLedPin": 13,
     "socketStatusLedPin": 12,
-    "nbSensors": 2,
+    "nbSensors": 3,
     "sensors": [{
             "id": "5e81197a68819b45fce01000",
             "type": "temperature",
@@ -15,9 +15,16 @@
             "intervalMeasure": 5000
         },
         {
+            "id": "5e81197a68819b45fce01001",
+            "type": "humidity",
+            "pin": 4,
+            "dhtType": 22,
+            "intervalMeasure": 7000
+        },
+        {
             "id": "5f4ec59b1f305e32f8f3e519",
             "type": "luminosity",
-            "intervalMeasure": 10000
+            "intervalMeasure": 9000
         }
     ]
 }

@@ -88,7 +88,7 @@ void resetSPIFFS()
         sensor["type"] = moduleConfig.sensors[i]->getType();
         sensor["intervalMeasure"] = moduleConfig.sensors[i]->getMeasureInterval();
 
-        if (String(moduleConfig.sensors[i]->getType()) == "temperature")
+        if (String(moduleConfig.sensors[i]->getType()) == "temperature" || String(moduleConfig.sensors[i]->getType()) == "humidity")
         {
             sensor["pin"] = moduleConfig.sensors[i]->getDhtPin();
             sensor["dhtType"] = moduleConfig.sensors[i]->getDhtType();
@@ -141,7 +141,7 @@ int saveRouterInfoInSPIFFS(void)
         sensor["type"] = moduleConfig.sensors[i]->getType();
         sensor["intervalMeasure"] = moduleConfig.sensors[i]->getMeasureInterval();
 
-        if (String(moduleConfig.sensors[i]->getType()) == "temperature")
+        if (String(moduleConfig.sensors[i]->getType()) == "temperature" || String(moduleConfig.sensors[i]->getType()) == "humidity")
         {
             sensor["pin"] = moduleConfig.sensors[i]->getDhtPin();
             sensor["dhtType"] = moduleConfig.sensors[i]->getDhtType();
@@ -165,7 +165,7 @@ int parseConfig(String config)
 {
     // TODO: Recheck capacity
     const size_t capacity = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(9) + 310;
-    DynamicJsonDocument doc(capacity);
+    DynamicJsonDocument doc(3000);
     // StaticJsonDocument<N> allocates memory on the stack, it can be
     // replaced by DynamicJsonDocument which allocates in the heap.
     //
@@ -207,6 +207,8 @@ int parseConfig(String config)
     moduleConfig.setSocketStatusLedPin(doc["socketStatusLedPin"]);
     moduleConfig.setSensorsSize(doc["nbSensors"]);
 
+    bool DhtAlreadyInstanciated = false;
+
     // Fetch the nested sensors
     for (int i = 0; i < moduleConfig.getNbSensors(); i++)
     {
@@ -216,21 +218,37 @@ int parseConfig(String config)
         int sensorIntervalMeasure = sensor["intervalMeasure"];
 
         // Fetch specific sensors infos for each sensor
-        if (String(sensorType) == "temperature")
+        if (String(sensorType) == "temperature" || String(sensorType) == "humidity")
         {
             int sensorPin = sensor["pin"];
             int sensorDhtType = sensor["dhtType"];
+            if (!DhtAlreadyInstanciated)
+            {
+                dhtTest = new DHT(sensorPin, sensorDhtType);
+                dhtTest->begin();
+            }
 
-            // Instanciate a new sensor and add it to the moduleConfig "sensors" vector
-            moduleConfig.sensors.push_back(new AirTemperatureSensor(sensorDhtType, sensorPin, String(sensorId), String(sensorType), sensorIntervalMeasure));
+            if (String(sensorType) == "temperature")
+            {
+                // Instanciate a new sensor and add it to the moduleConfig "sensors" vector
+                moduleConfig.sensors.push_back(new AirTemperatureSensor(dhtTest, sensorDhtType, sensorPin, String(sensorId), String(sensorType), sensorIntervalMeasure));
+            }
+            else
+            {
+                // Instanciate a new sensor and add it to the moduleConfig "sensors" vector
+                moduleConfig.sensors.push_back(new AirHumiditySensor(dhtTest, sensorDhtType, sensorPin, String(sensorId), String(sensorType), sensorIntervalMeasure));
+            }
+
+            Serial.println(moduleConfig.sensors[0]->getMeasure());
+            DhtAlreadyInstanciated = true;
         }
-        if (String(sensorType) == "luminosity")
+        else if (String(sensorType) == "luminosity")
         {
             // Instanciate a new sensor and add it to the moduleConfig "sensors" vector
             moduleConfig.sensors.push_back(new BrightnessSensor(sensor["id"].as<String>(), sensor["type"].as<String>(), sensor["intervalMeasure"]));
         }
     }
-
+    Serial.println(moduleConfig.sensors[0]->getMeasure());
     // Configuration well done
     return 0;
 }
