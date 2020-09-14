@@ -1,6 +1,5 @@
 #include "various_functions.h"
 #include <Arduino.h>
-//TODO: effectuer le reset dans l'interruption car sinon obligé d'attendre la fin de l'init
 
 void resetButtonInterrupt()
 {

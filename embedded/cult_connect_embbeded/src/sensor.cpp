@@ -4,74 +4,38 @@
 
 Sensor::Sensor(String id, String type, uint32_t timer, uint32_t repeat, resolution_t resolution)
 {
+    // Initialize the sensors ticker
     this->resolution = resolution;
     if (resolution == MICROS)
         timer = timer * 1000;
 
     this->timer = timer;
     this->repeat = repeat;
-    // this->callback = &Sensor::raiseStartMeasureFlag;
     enabled = false;
     lastTime = 0;
     counts = 0;
 
     this->type = type;
     this->id = id;
-    startMeasureFlag = false;
 }
 
 Sensor::~Sensor() {}
 
-void Sensor::setStartMeasureFlag(bool val)
-{
-    this->startMeasureFlag = val;
-}
-bool Sensor::getStartMeasureFlag(void)
-{
-    return this->startMeasureFlag;
-}
+String Sensor::getId(void) { return this->id; }
 
-String Sensor::getId(void)
-{
-    return this->id;
-}
+void Sensor::setISR(void) { this->start(); }
 
-void Sensor::setISR(void)
-{
-    Serial.println("setting isr");
-    this->start();
-    // this->startingMeasureTicker.attach(this->getMeasureInterval(), raiseStartMeasureFlag);
-}
-
-void Sensor::raiseStartMeasureFlag(void)
-{
-    this->setStartMeasureFlag(true);
-}
-
-void Sensor::lowerStartMeasureFlag(void)
-{
-    // moduleConfig.sensorFocused.setStartMeasureFlag(false);
-}
 uint32_t Sensor::getMeasureInterval(void)
 {
     return this->timer;
 }
 
-String Sensor::getType(void)
-{
-    return this->type;
-}
+String Sensor::getType(void) { return this->type; }
 
-void Sensor::setType(String type)
-{
-    this->type = type;
-}
+void Sensor::setType(String type) { this->type = type; }
 
 void Sensor::start()
 {
-    Serial.println("staaart");
-    // if (callback == NULL)
-    //     return;
     if (resolution == MILLIS)
         lastTime = millis();
     else
@@ -83,8 +47,6 @@ void Sensor::start()
 
 void Sensor::resume()
 {
-    // if (callback == NULL)
-    //     return;
     if (resolution == MILLIS)
         lastTime = millis() - diffTime;
     else
@@ -223,16 +185,12 @@ uint32_t Sensor::counter()
     return counts;
 }
 
+// TODO: put specific sensors classes in different files?
 AirTemperatureSensor::AirTemperatureSensor(int dhtType, int pin, String id, String type, uint32_t timer, uint32_t repeat, resolution_t resolution) : Sensor(id, type, timer, repeat, resolution), sensor(pin, dhtType)
 {
-    Serial.print("pin: ");
-    Serial.println(pin);
-    Serial.print("dhtType: ");
-    Serial.println(dhtType);
     this->dhtPin = pin;
     this->dhtType = dhtType;
     this->sensor.begin();
-    Serial.println("sensor well initialized");
 }
 
 float AirTemperatureSensor::getMeasure(void)
@@ -242,45 +200,9 @@ float AirTemperatureSensor::getMeasure(void)
     float temperature = this->sensor.readTemperature();
     return isnan(temperature) ? -1 : temperature;
 }
-int AirTemperatureSensor::getDhtPin(void)
-{
-    Serial.print("getting pin: ");
-    Serial.println(this->dhtPin);
-    return this->dhtPin;
-}
-int AirTemperatureSensor::getDhtType(void)
-{
-    Serial.print("getDhtType: ");
-    Serial.println(this->dhtType);
-    return this->dhtType;
-}
-// int AirTemperatureSensor::sendSensorData2Server(void)
-// {
-//     Serial.println("sendsensordata temp");
-//     if (isInternetConnected())
-//     {
-//         if (timeClient.update())
-//         {
-//             float celciusTemperatureFromDHT22 = this->getMeasure();
+int AirTemperatureSensor::getDhtPin(void) { return this->dhtPin; }
 
-//             if (celciusTemperatureFromDHT22 != -1)
-//             {
-//                 String currentDateTime = timeClient.getFormattedTime();
-//                 String dataToSend = "\"{'moduleId': '" + moduleConfig.getId() + "', 'sensorId': '" + this->getId() + "', 'data' : {'date' : '" + timeClient.getFormattedDate() + "', 'value' : " + String(celciusTemperatureFromDHT22) + "}}\"";
-//                 Serial.println(dataToSend);
-//                 // webSocket.emit("newDataFromModule", dataToSend.c_str());
-
-//                 return 0;
-//             }
-//             else
-//                 return 3;
-//         }
-//         else
-//             return 2;
-//     }
-//     else
-//         return 1;
-// }
+int AirTemperatureSensor::getDhtType(void) { return this->dhtType; }
 
 String AirTemperatureSensor::toString(void)
 {
@@ -331,8 +253,6 @@ int BrightnessSensor::init()
     this->sensor.setIntegrationTime(TSL2561_INTEGRATIONTIME_13MS); /* fast but low resolution */
     // brightnessSensor.setIntegrationTime(TSL2561_INTEGRATIONTIME_101MS);  /* medium resolution and speed   */
     // brightnessSensor.setIntegrationTime(TSL2561_INTEGRATIONTIME_402MS);  /* 16-bit data but slowest conversions */
-    //TODO: check
-    // startingBrightnessMeasureTicker.attach(brightnessMeasureTickerDelay, raiseBrightnessMeasureFlag);
 
     return 0;
 }
@@ -366,36 +286,6 @@ float BrightnessSensor::getMeasure(void)
     } while (i < 5);
     return 0;
 }
-
-// int BrightnessSensor::sendSensorData2Server(void)
-// {
-
-//     Serial.println("sendsensordata light");
-
-//     if (isInternetConnected())
-//     {
-//         if (timeClient.update())
-//         {
-//             float bri = this->getMeasure();
-
-//             if (celciusTemperatureFromDHT22 != -1)
-//             {
-//                 String currentDateTime = timeClient.getFormattedTime();
-//                 String dataToSend = "\"{'moduleId': '" + moduleConfig.getId() + "', 'sensorId': '" + this->getId() + "', 'data' : {'date' : '" + timeClient.getFormattedDate() + "', 'value' : " + String(celciusTemperatureFromDHT22) + "}}\"";
-//                 Serial.println(dataToSend);
-//                 // webSocket.emit("newDataFromModule", dataToSend.c_str());
-
-//                 return 0;
-//             }
-//             else
-//                 return 3;
-//         }
-//         else
-//             return 2;
-//     }
-//     else
-//         return 1;
-// }
 
 String BrightnessSensor::toString(void)
 {

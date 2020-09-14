@@ -6,6 +6,7 @@
 #include "sensor.h"
 #include <vector>
 
+// Class containing all module infos and the sensors the module contains
 class Config
 {
 private:
@@ -14,18 +15,19 @@ private:
     uint8_t SOCKET_STATUS_LED_PIN;
     bool resetModuleFlag;
     unsigned long lastDebounceTime;
-
-public:
-    Sensor *sensorFocused;
     String routerSSID;
     String routerPassword;
     String id;
     String name;
     String privateId;
     int nbSensors;
+
+public:
+    // TODO: needs to be private?
     std::vector<Sensor *> sensors;
 
     Config();
+    ~Config();
 
     void setLastDebounceTime(unsigned long value);
     unsigned long getLastDebounceTime(void);
@@ -44,11 +46,9 @@ public:
     String getId();
     String getName();
     String getPrivateId();
-    String toString();
     int getNbSensors();
     void setSensorsSize(int size);
-    // setModuleName(String moduleId);
-    // setSensors(Sensor sensorsList[])
+    String toString();
 };
 
 #endif

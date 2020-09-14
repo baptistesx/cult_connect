@@ -1,71 +1,18 @@
 #include "main.h"
-#include <vector>
 
-/***** BLE global variables *****/
-// BLECharacteristic *pCharacteristic = NULL;
-// BLEServer *pServer = NULL;
-
-// // BLE module state
-// bool isBleON = false;
-
-// // Previous BLE module state
-// bool oldIsBleON = false;
-
-// // BLE module connection state
-// bool isBLEConnected = false;
-
-// // BLE module connection previous state
-// bool oldIsBLEConnected = false;
-
-// // Value received by the paired device
-// std::string rawBLEValueReceived = "0";
-
-// Value notified by the module over BLE
-// uint32_t valToNotifyBLE = 0;
-
-// Previous value notified by the module over BLE
-// uint32_t oldValToNotifyBLE = 0;
-
-/***** Internet global variables *****/
-// Internet router SSID
-// String routerSsid = "";
-
-// Internet router password
-// String routerPassword = "";
-
+// Instances necessary to get time from a NTP server by UDP
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP);
 
-/***** Various global variables *****/
-
-// String MODULE_PRIVATE_ID = "";
-// String MODULE_NAME = "";
-
-// When this flag is high => reset SPIFFS memory and reboot
-// bool resetModuleFlag = false;
-
-// The last time the output pin was toggled
-// unsigned long lastDebounceTime = 0;
-
-/***** Monitoring global variables *****/
-//Sensor DHT22 object (humidity and temperature sensor)
-// DHT humidityTemperatureSensor(4, DHTTYPE);
-// bool startingHumidityTemperatureMeasureFlag = false;
-// bool startingBrightnessMeasureFlag = false;
-// String sensors[NUMBER_OF_MODULE_SENSORS];
-//TODO: check
-// Ticker startingHumidityTemperatureMeasureTicker;
-// Ticker startingBrightnessMeasureTicker;
-
-// int humidityTemperatureMeasureTickerDelay = 10;
-// int brightnessMeasureTickerDelay = 20;
-// Adafruit_TSL2561_Unified brightnessSensor = Adafruit_TSL2561_Unified(TSL2561_ADDR_FLOAT, 12345);
-
-/***** Websocketsio global variables *****/
-
+// WebsocketIO client instance to discuss with the server
 SocketIoClient webSocket;
+
+// Bluetooth LE instance
 BleInstance bleInstance;
+
+// Instance containing the module configuration
 Config moduleConfig;
+
 //First executed function when the module starts <=> initialisation
 void setup()
 {
@@ -74,21 +21,20 @@ void setup()
 
     Serial.println("[INIT] Serial communication (" + String(SERIAL_SPEED) + " bauds, 8 data bits, no parity, 1 stop bit): OK");
 
-    if (!SPIFFSInit()) //Init error case
+    if (!SPIFFSInit())
     {
+        //Init error case
+        // The module configuration is stored into SPIFFS memory
+        // if the SPIFFS fails to mount, the module cannot work properly
         printf("[INIT] SPIFFS: KO, SPIFFS Mount Failed -> Reboot...\n");
-
         ESP.restart();
     }
     Serial.println("[INIT] SPIFFS: OK");
 
-    int res = readConfigFileFromSPIFFS();
-    Serial.println(readFile(SPIFFS, CONFIG_FILE_PATH_IN_SPIFFS));
-    switch (res)
+    switch (configureModule())
     {
     case 0:
         Serial.println("[INIT] Module configuration from config.json file: OK");
-        Serial.println(moduleConfig.toString());
         break;
     case 1:
         Serial.println("[ERROR] Module configuration from config.json file: KO, no config file found!");
@@ -103,6 +49,7 @@ void setup()
     default:
         break;
     }
+
     statusLedsInit();
     Serial.println("[INIT] Status LEDs: OK");
 
@@ -114,18 +61,16 @@ void setup()
         Serial.println("No internet router ids stored in memory");
         Serial.println("\t=> BLE mode");
         bleInstance.init();
-        // BLEInit();
         Serial.println("[INIT] BLE: OK");
     }
     else
     {
-
         if (!connection2InternetRouter(moduleConfig.getRouterSSID(), moduleConfig.getRouterPassword()))
         {
             Serial.println("[INIT] Connection to the internet router: KO");
             Serial.println("=> ssid: " + moduleConfig.getRouterSSID() + " & password: " + moduleConfig.getRouterPassword());
 
-            //TODO: todo
+            //TODO: implement some retry if the connection failed
             // Serial.println("\tTimer configuration to retry later");
             // start_new_try.attach(TEMPO_NEW_TRY, new_try);
         }
@@ -143,8 +88,8 @@ void setup()
             websocketioInit();
             Serial.println("[INIT] WebSocketIo: OK");
 
-            sensorsInit();
-            //TODO: list sensors
+            startSensorsTimers();
+
             Serial.println("[INIT] Sensors: OK");
         }
     }
@@ -154,18 +99,14 @@ void setup()
 
 void loop()
 {
-    for (int i = 0; i < moduleConfig.getNbSensors(); i++)
-    {
-        moduleConfig.sensors[i]->update();
-    }
     // If the flag to reset the module is up
     if (moduleConfig.getResetModuleFlag())
     {
         //Clear the SPIFFS memory then reboot
         Serial.println("reset spiff");
+        // Will clear the internet router ids, the reboot and start BLE mode
         resetSPIFFS();
         Serial.println("Reboot......");
-        Serial.println(readFile(SPIFFS, CONFIG_FILE_PATH_IN_SPIFFS));
         delay(2000);
         ESP.restart();
     }
@@ -184,9 +125,7 @@ void loop()
         {
             Serial.println("BLE Disconnected");
             delay(500); // give the bluetooth stack the chance to get things ready
-            // pServer->startAdvertising(); // restart advertising
-            // Serial.println("start advertising");
-            // oldIsBLEConnected = isBLEConnected;
+
             Serial.println("Reboot...");
 
             ESP.restart();
@@ -214,77 +153,13 @@ void loop()
             ESP.restart();
         }
 
+        // Check if sensors measure ticker is up
+        for (int i = 0; i < moduleConfig.getNbSensors(); i++)
+        {
+            moduleConfig.sensors[i]->update();
+        }
+
         //Check if there is someting to do with the WebSocket
         webSocket.loop();
-
-        //If the flag for a new measure is up => sensors reading
-        // if (startingHumidityTemperatureMeasureFlag)
-        // {
-        //     //TODO: check
-        //     // startingHumidityTemperatureMeasureTicker.detach(); //Disable interruption for new measures
-
-        //     int res = sendSensorsData2Server(1);
-
-        //     switch (res)
-        //     {
-        //     case 0:
-        //         Serial.println("Data sent to the server with Success!");
-        //         break;
-        //     case 1:
-        //         Serial.println("[ERROR] No internet connection: failed to send data sensors to the server! ");
-        //         break;
-        //     case 2:
-        //         Serial.println("[ERROR] Failed to get the current time! ");
-        //         break;
-        //     case 3:
-        //         //TODO: adapt for the specific sensor
-        //         Serial.println("[ERROR] Failed to read DHT22 sensor!");
-        //         break;
-        //     case 4:
-        //         Serial.println("[ERROR] Unknown sensor!");
-        //         break;
-        //     default:
-        //         Serial.println("[ERROR] Unkown error while sending data to the server!");
-        //         break;
-        //     }
-        //     //TODO: check
-
-        //     // startingHumidityTemperatureMeasureTicker.attach(humidityTemperatureMeasureTickerDelay, raiseHumidityTemperatureMeasureFlag); //Enable interruption for new measures
-
-        //     startingHumidityTemperatureMeasureFlag = false; //Lower the flag
-        // }
-
-        // if (startingBrightnessMeasureFlag)
-        // {
-        //     //TODO: check
-        //     // startingBrightnessMeasureTicker.detach(); //Disable interruption for new measures
-
-        //     int res = sendSensorsData2Server(2);
-
-        //     switch (res)
-        //     {
-        //     case 0:
-        //         Serial.println("Data sent to the server with Success!");
-        //         break;
-        //     case 1:
-        //         Serial.println("[ERROR] No internet connection: failed to send data sensors to the server! ");
-        //         break;
-        //     case 2:
-        //         Serial.println("[ERROR] Failed to get the current time! ");
-        //         break;
-        //     case 3:
-        //         //TODO: adapt for the specific sensor
-        //         Serial.println("[ERROR] Failed to read TSL2561 sensor!");
-        //         break;
-        //     default:
-        //         Serial.println("[ERROR] Unkown error while sending data to the server!");
-        //         break;
-        //     }
-
-        //     //TODO: check
-        //     // startingBrightnessMeasureTicker.attach(brightnessMeasureTickerDelay, raiseBrightnessMeasureFlag); //Enable interruption for new measures
-
-        //     startingBrightnessMeasureFlag = false; //Lower the flag
-        // }
     }
 }

@@ -11,9 +11,4 @@ bool connection2InternetRouter(String ssid, String password);
 // Return true if the module has internet access
 bool isInternetConnected(void);
 
-// void updateCurrentDateTime(void);
-
-// Reset routerId and routerPassword global variables
-// void clearRouterIds(void);
-
 #endif

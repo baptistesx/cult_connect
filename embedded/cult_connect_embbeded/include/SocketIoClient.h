@@ -1,8 +1,6 @@
 #ifndef __SOCKET_IO_CLIENT_H_
 #define __SOCKET_IO_CLIENT_H_
 
-// #include "main.h"
-
 #include <map>
 #include <vector>
 #include <WebSocketsClient.h>

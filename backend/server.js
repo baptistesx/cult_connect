@@ -648,10 +648,9 @@ io.sockets.on('connection', function (socket) {
         sensors.findOne({
           _id: dataParsed.sensorId
         }, function (err, sensor) {
-          for (i = 0; i < dataParsed.data.length; i++) {
-            console.log(dataParsed.data[i])
-            sensor.data.push(dataParsed.data[i])
-          }
+          console.log(dataParsed.data)
+          sensor.data.push(dataParsed.data)
+
           //Sauvegarde de la data en base de données
           sensor.save(function (err, sensor) {
             getSensorData(dataParsed.moduleId, sensor, function (dataToSend) {

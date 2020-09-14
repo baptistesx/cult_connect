@@ -1,6 +1,6 @@
 {
-    "routerSSID": "",
-    "routerPassword": "",
+    "routerSSID": "Martin Router King",
+    "routerPassword": "phelmaRPZ204",
     "id": "5e7a80125d33fe0d041ff8cb",
     "privateId": "123",
     "resetButtonPin": 32,

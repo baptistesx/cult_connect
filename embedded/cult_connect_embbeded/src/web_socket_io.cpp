@@ -4,7 +4,7 @@ void socketConnected(const char *payload, size_t length)
 {
     Serial.println("Socket.IO Connected!");
     String tempId = "\"";
-    tempId += String(moduleConfig.getName() );
+    tempId += String(moduleConfig.getName());
     tempId += "\"";
 
     int tempId_len = tempId.length() + 1;
@@ -24,4 +24,3 @@ void messageEventHandler(const char *payload, size_t length)
 {
     Serial.printf("got message: %s\n", payload);
 }
-

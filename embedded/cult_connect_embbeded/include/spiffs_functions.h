@@ -5,22 +5,43 @@
 
 #include "SPIFFS.h"
 
-#define ROUTER_IDS_FILE_PATH_IN_SPIFFS "/router_ids"
+// Path to the json configuration file into SPIFFS memory, from root directory
 #define CONFIG_FILE_PATH_IN_SPIFFS "/config.json"
 
 #define FORMAT_SPIFFS_IF_FAILED true
 
+// List directory content
 void listDir(fs::FS &fs, const char *dirname, uint8_t levels);
+
+// Return the content of the file read or an empty String if error
 String readFile(fs::FS &fs, const char *path);
+
+// Write message in a file to the desired path
 bool writeFile(fs::FS &fs, const char *path, const char *message);
-void appendFile(fs::FS &fs, const char *path, const char *message);
-void renameFile(fs::FS &fs, const char *path1, const char *path2);
-void deleteFile(fs::FS &fs, const char *path);
-void testFileIO(fs::FS &fs, const char *path);
+
+// Clear internet router ids in the json config file
 void resetSPIFFS(void);
-int readRouterIdsFile(String *routerSsid, String *routerPassword);
-void parseRouterIds(String rawIds, String *routerSsid, String *routerPassword);
-int readConfigFileFromSPIFFS(void);
+
+// The router config is store in the SPIFFS memory CONFIG_FILE_PATH_IN_SPIFFS with json format
+/* The configuration file is composed of:
+        - routerSSID: internet router SSID
+        - routerPassword: internet router Password
+        - id: module id (same as in database)
+        - privateId: module private id
+        - resetButtonPin: reset button pin
+        - bleStatusLedPin: BLE status Led indicator pin
+        - socketStatusLedPin: Socket status Led indicator pin
+        - nbSensors: number of differents module sensors
+        - sensors: array of sensors with their infos
+
+    The file is read and parsed in order to initialize the moduleConfig global instance
+*/
+int configureModule(void);
+
+// Parse the config raw String and configure the moduleConfig global instance
 int parseConfig(String rawConfig);
+
+// Save router info into SPIFFS memory
+int saveRouterInfoInSPIFFS(void);
 
 #endif

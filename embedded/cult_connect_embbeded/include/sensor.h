@@ -3,16 +3,18 @@
 
 #include <Arduino.h>
 
-// Interrupt library
-// #include <Ticker.h>
-
 // Library to work with DHT (humidity/temperature sensor)
 #include "DHT.h"
+
 // Adafruit library to work with various sensors
 #include <Adafruit_Sensor.h>
 
 // The TSL2561 is a luminosity sensor
 #include <Adafruit_TSL2561_U.h>
+
+// The content of the library Ticker has been extracted and use directly in th Sensor class
+// in order to be more flexible on the ISR
+
 /** Ticker internal resolution
  *
  * @param MICROS default, the resoöution is in micro seconds, max is 70 minutes, the real resoltuion is 4 microseconds at 16MHz CPU cycle
@@ -40,31 +42,34 @@ enum status_t
     PAUSED
 };
 
-// typedef void (*fptr)();
-
+// Global Sensor class, the specific sensors class will extends this one
 class Sensor
 {
 private:
+    // Type of the measure (temperature, humidity etc...)
     String type;
+
+    // Sensor id (same as in database)
     String id;
-    bool startMeasureFlag;
-    // int measureInterval;
 
-    // Ticker startingMeasureTicker;
-
+    // Returns mesure timer flag
     bool tick();
+
+    // Enable tick()
     bool enabled;
+
+    // Measure period
     uint32_t timer;
     uint32_t repeat;
     resolution_t resolution = MICROS;
     uint32_t counts;
     status_t status;
-    // fptr callback;
     uint32_t lastTime;
     uint32_t diffTime;
 
 public:
     Sensor(String id, String type, uint32_t timer, uint32_t repeat = 0, resolution_t resolution = MICROS);
+
     ~Sensor();
     /** start the ticker
 	 *
@@ -117,28 +122,44 @@ public:
 	 *
 	 */
     uint32_t counter();
-    void setStartMeasureFlag(bool val);
-    bool getStartMeasureFlag(void);
+
+    // Get the timer attribut (period between measures)
     uint32_t getMeasureInterval(void);
+
+    // Enable timer interruption
     void setISR(void);
+
+    // Get sensor id
     String getId(void);
+
     void setType(String type);
     String getType(void);
-    void raiseStartMeasureFlag(void);
-    void lowerStartMeasureFlag(void);
-    virtual float getMeasure(void){};
+
+    // Once the measure is realized, send data to the server to store them
     int sendSensorData2Server();
-    virtual String toString(){};
+
+    // Virutal method that specific sensors will implement
+    virtual float getMeasure(void){};
+
+    // TODO: move to TemperatureSensor class but when  loop on moduleConfig.sensors =>issue cause it iterates on Sensor objects and not on specific sensors
     virtual int getDhtPin(){};
     virtual int getDhtType(){};
-    // virtual void init(void);
+
+    virtual String toString(){};
 };
 
+// Specific class for temperature sensor
+// Allow to add attributes and methods to the DHT object
 class AirTemperatureSensor : public Sensor
 {
 private:
+    // DHT : Digital Humidity and Temperature sensor
     DHT sensor;
+
+    // uC pin on which is connected the sensor
     int dhtPin;
+
+    // DHT11 or DHT22
     int dhtType;
 
 public:
@@ -146,11 +167,15 @@ public:
 
     int getDhtPin(void);
     int getDhtType(void);
+
+    // Realize the temperature measure
     float getMeasure(void) override;
-    // int sendSensorData2Server(void);
+
     String toString(void) override;
 };
 
+// Specific class for brightness sensor
+// Allows to add attributes and methods to the Adafruit_TSL2561_Unified sensor
 class BrightnessSensor : public Sensor
 {
 private:
@@ -159,22 +184,13 @@ private:
 public:
     BrightnessSensor(String id, String type, uint32_t timer, uint32_t repeat = 0, resolution_t resolution = MICROS);
 
+    // Initialize the sensor
     int init();
+
+    // Realize the measure
     float getMeasure(void) override;
-    // int sendSensorData2Server(void);
+
     String toString(void) override;
 };
-
-// class AirTemperatureSensor : public Sensor
-// {
-// private:
-//     DHT sensor;
-
-// public:
-//     AirTemperatureSensor(int dhtType, int pin, int interval, String id, String type);
-//     float getMeasure(void) override;
-//     int sendSensorData2Server(void);
-//     String toString(void);
-// };
 
 #endif

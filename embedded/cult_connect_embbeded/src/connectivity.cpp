@@ -31,16 +31,3 @@ bool isInternetConnected(void)
 {
     return WiFi.status() == WL_CONNECTED;
 }
-
-// Update the currentDateTime global variable from the NTP client
-// void updateCurrentDateTime(void)
-// {
-//     if (timeClient.update())
-//         currentDateTime = timeClient.getFormattedDate();
-// }
-
-// void clearRouterIds(void)
-// {
-//     routerSsid = "";
-//     routerPassword = "";
-// }
