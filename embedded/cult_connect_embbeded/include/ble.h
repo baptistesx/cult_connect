@@ -34,8 +34,10 @@ private:
 public:
     BleInstance();
     ~BleInstance();
+
     // Initialize the server and the characteristic to be available
     void init(void);
+
     void setIsBleOn(bool value);
     void setOldIsBleOn(bool value);
     void setIsBleConnected(bool value);

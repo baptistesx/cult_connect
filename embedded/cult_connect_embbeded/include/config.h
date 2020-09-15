@@ -1,7 +1,6 @@
 #ifndef __CONFIG_H_
 #define __CONFIG_H_
 
-// #include "main.h"
 #include "Arduino.h"
 #include "sensor.h"
 #include <vector>

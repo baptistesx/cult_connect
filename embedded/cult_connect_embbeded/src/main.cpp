@@ -93,12 +93,7 @@ void setup()
             Serial.println("[INIT] Sensors: OK");
         }
     }
-    for (int i = 0; i < moduleConfig.getNbSensors(); i++)
-    {
-        Serial.print("mesure  ");
-        Serial.print(moduleConfig.sensors[i]->getType());
-        Serial.println(moduleConfig.sensors[i]->getMeasure());
-    }
+
     Serial.printf("=============================\nSetup done\n=============================\n\n");
 }
 
@@ -112,6 +107,7 @@ void loop()
         // Will clear the internet router ids, the reboot and start BLE mode
         resetSPIFFS();
         Serial.println("Reboot......");
+        Serial.println(readFile(SPIFFS, CONFIG_FILE_PATH_IN_SPIFFS));
         delay(2000);
         ESP.restart();
     }

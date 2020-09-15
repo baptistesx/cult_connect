@@ -7,9 +7,9 @@ Sensor::Sensor(String id, String type, uint32_t timer, uint32_t repeat, resoluti
     // Initialize the sensors ticker
     this->resolution = resolution;
     if (resolution == MICROS)
-        timer = timer * 1000;
+        timer = timer * 1000000;
 
-    this->timer = timer;
+    this->timer = timer*1000;
     this->repeat = repeat;
     enabled = false;
     lastTime = 0;
@@ -36,6 +36,7 @@ void Sensor::setType(String type) { this->type = type; }
 
 void Sensor::start()
 {
+    Serial.println("isr started");
     if (resolution == MILLIS)
         lastTime = millis();
     else
@@ -161,9 +162,10 @@ bool Sensor::tick()
 
 void Sensor::interval(uint32_t timer)
 {
+    // timer is received in seconds
     if (resolution == MICROS)
-        timer = timer * 1000;
-    this->timer = timer;
+        timer = timer * 1000000;
+    this->timer = timer*1000;
 }
 
 uint32_t Sensor::elapsed()

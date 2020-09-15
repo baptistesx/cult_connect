@@ -1,2 +1,45 @@
-{"moduleName":"M_5e7a88e55d33fe0d041ff8ce","privateId":"456","sensors":["5f4ec59b1f305e32f8f3e519"]}
-{"moduleName":"M_5e7a80125d33fe0d041ff8cb","privateId":"123","sensors":["5e81197a68819b45fce01000", "5e81197a68819b45fce01001"]}
+{
+    "routerSSID": "",
+    "routerPassword": "",
+    "id": "5e7a80125d33fe0d041ff8cb",
+    "privateId": "123",
+    "resetButtonPin": 32,
+    "bleStatusLedPin": 13,
+    "socketStatusLedPin": 12,
+    "nbSensors": 2,
+    "sensors": [{
+            "id": "5e81197a68819b45fce01000",
+            "type": "temperature",
+            "pin": 4,
+            "dhtType": 22,
+            "intervalMeasure": 4
+        },
+        {
+            "id": "5e81197a68819b45fce01001",
+            "type": "humidity",
+            "pin": 4,
+            "dhtType": 22,
+            "intervalMeasure": 4
+        }
+    ]
+}
+
+
+
+{
+    "routerSSID": "",
+    "routerPassword": "",
+    "id": "5e7a88e55d33fe0d041ff8ce",
+    "privateId": "456",
+    "resetButtonPin": 32,
+    "bleStatusLedPin": 13,
+    "socketStatusLedPin": 12,
+    "nbSensors": 1,
+    "sensors": [
+        {
+            "id": "5f4ec59b1f305e32f8f3e519",
+            "type": "luminosity",
+            "intervalMeasure": 4
+        }
+    ]
+}

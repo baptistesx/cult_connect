@@ -67,7 +67,7 @@ void resetSPIFFS()
     // and with empty internet router ids
     // TODO: Recheck capacity
     const size_t capacity = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(9);
-    DynamicJsonDocument doc(3000);
+    DynamicJsonDocument doc(2000);
 
     doc["routerSSID"] = "";
     doc["routerPassword"] = "";
@@ -86,7 +86,9 @@ void resetSPIFFS()
 
         sensor["id"] = moduleConfig.sensors[i]->getId();
         sensor["type"] = moduleConfig.sensors[i]->getType();
-        sensor["intervalMeasure"] = moduleConfig.sensors[i]->getMeasureInterval();
+        // Need to divide by 1000 beacause the Sensor instanciation worked with ms
+        // And the intervalMeasure is stored in seconds in the config file
+        sensor["intervalMeasure"] = moduleConfig.sensors[i]->getMeasureInterval() / 1000;
 
         if (String(moduleConfig.sensors[i]->getType()) == "temperature" || String(moduleConfig.sensors[i]->getType()) == "humidity")
         {
@@ -101,6 +103,7 @@ void resetSPIFFS()
     // Serialize JSON to file
     if (serializeJson(doc, file) == 0)
         Serial.println(F("[ERROR] Failed to write to file"));
+    Serial.println(readFile(SPIFFS, CONFIG_FILE_PATH_IN_SPIFFS));
 }
 
 int configureModule(void)
@@ -120,7 +123,7 @@ int saveRouterInfoInSPIFFS(void)
 
     // TODO: check capacity
     const size_t capacity = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(9);
-    DynamicJsonDocument doc(3000);
+    DynamicJsonDocument doc(2000);
 
     doc["routerSSID"] = moduleConfig.getRouterSSID();
     doc["routerPassword"] = moduleConfig.getRouterPassword();
@@ -139,18 +142,14 @@ int saveRouterInfoInSPIFFS(void)
 
         sensor["id"] = moduleConfig.sensors[i]->getId();
         sensor["type"] = moduleConfig.sensors[i]->getType();
-        sensor["intervalMeasure"] = moduleConfig.sensors[i]->getMeasureInterval();
+        // Need to divide by 1000 beacause the Sensor instanciation worked with ms
+        // And the intervalMeasure is stored in seconds in the config file
+        sensor["intervalMeasure"] = moduleConfig.sensors[i]->getMeasureInterval() / 1000;
 
         if (String(moduleConfig.sensors[i]->getType()) == "temperature" || String(moduleConfig.sensors[i]->getType()) == "humidity")
         {
             sensor["pin"] = moduleConfig.sensors[i]->getDhtPin();
             sensor["dhtType"] = moduleConfig.sensors[i]->getDhtType();
-            Serial.println(sensor["pin"].as<int>());
-            Serial.println(sensor["dhtType"].as<int>());
-        }
-        if (String(moduleConfig.sensors[i]->getType()) == "luminosity")
-        {
-            Serial.println("luminosity sensor");
         }
     }
 
@@ -165,7 +164,7 @@ int parseConfig(String config)
 {
     // TODO: Recheck capacity
     const size_t capacity = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(9) + 310;
-    DynamicJsonDocument doc(3000);
+    DynamicJsonDocument doc(2000);
     // StaticJsonDocument<N> allocates memory on the stack, it can be
     // replaced by DynamicJsonDocument which allocates in the heap.
     //
@@ -239,7 +238,6 @@ int parseConfig(String config)
                 moduleConfig.sensors.push_back(new AirHumiditySensor(dhtTest, sensorDhtType, sensorPin, String(sensorId), String(sensorType), sensorIntervalMeasure));
             }
 
-            Serial.println(moduleConfig.sensors[0]->getMeasure());
             DhtAlreadyInstanciated = true;
         }
         else if (String(sensorType) == "luminosity")
@@ -248,7 +246,7 @@ int parseConfig(String config)
             moduleConfig.sensors.push_back(new BrightnessSensor(sensor["id"].as<String>(), sensor["type"].as<String>(), sensor["intervalMeasure"]));
         }
     }
-    Serial.println(moduleConfig.sensors[0]->getMeasure());
+
     // Configuration well done
     return 0;
 }

@@ -17,7 +17,7 @@
 
 /** Ticker internal resolution
  *
- * @param MICROS default, the resoöution is in micro seconds, max is 70 minutes, the real resoltuion is 4 microseconds at 16MHz CPU cycle
+ * @param MICROS default, the resolution is in micro seconds, max is 70 minutes, the real resoltuion is 4 microseconds at 16MHz CPU cycle
  * @param MILLIS set the resolution to millis, for longer cycles over 70 minutes
  *
  */
@@ -61,14 +61,14 @@ private:
     // Measure period
     uint32_t timer;
     uint32_t repeat;
-    resolution_t resolution = MICROS;
+    resolution_t resolution;
     uint32_t counts;
     status_t status;
     uint32_t lastTime;
     uint32_t diffTime;
 
 public:
-    Sensor(String id, String type, uint32_t timer, uint32_t repeat = 0, resolution_t resolution = MICROS);
+    Sensor(String id, String type, uint32_t timer, uint32_t repeat = 0, resolution_t resolution = MILLIS);
 
     ~Sensor();
     /** start the ticker
@@ -163,7 +163,7 @@ private:
     int dhtType;
 
 public:
-    AirTemperatureSensor(DHT* dhtSensor, int dhtType, int pin, String id, String type, uint32_t timer, uint32_t repeat = 0, resolution_t resolution = MICROS);
+    AirTemperatureSensor(DHT *dhtSensor, int dhtType, int pin, String id, String type, uint32_t timer, uint32_t repeat = 0, resolution_t resolution = MILLIS);
 
     int getDhtPin(void);
     int getDhtType(void);
@@ -189,7 +189,7 @@ private:
     int dhtType;
 
 public:
-    AirHumiditySensor(DHT* dhtSensor, int dhtType, int pin, String id, String type, uint32_t timer, uint32_t repeat = 0, resolution_t resolution = MICROS);
+    AirHumiditySensor(DHT *dhtSensor, int dhtType, int pin, String id, String type, uint32_t timer, uint32_t repeat = 0, resolution_t resolution = MILLIS);
 
     int getDhtPin(void);
     int getDhtType(void);
@@ -208,7 +208,7 @@ private:
     Adafruit_TSL2561_Unified sensor;
 
 public:
-    BrightnessSensor(String id, String type, uint32_t timer, uint32_t repeat = 0, resolution_t resolution = MICROS);
+    BrightnessSensor(String id, String type, uint32_t timer, uint32_t repeat = 0, resolution_t resolution = MILLIS);
 
     // Initialize the sensor
     int init();
