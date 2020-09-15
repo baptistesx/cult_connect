@@ -1,5 +1,7 @@
-#include "ble.h"
+#include "ble_instance.h"
 #include "main.h"
+#include "ble_server_callbacks.h"
+#include "ble_characteristic_callbacks.h"
 
 BleInstance::BleInstance()
 {
@@ -28,15 +30,22 @@ BLEServer *BleInstance::getPServer(void) { return this->pServer; }
 
 void BleInstance::init(void)
 {
+    // Indicate with LEDs, the BLE mode is ON
     digitalWrite(moduleConfig.getBleStatusLedPin(), HIGH);
     digitalWrite(moduleConfig.getSocketStatusLedPin(), LOW);
 
+    // Initialize the BLE on the module, then initialize the server
+    // in order user via mobile app can connect to the module
     BLEDevice::init(moduleConfig.getName().c_str());
     this->setPServer();
+
+    // The callbacks will be triggered with events of the BLE state
     this->getPServer()->setCallbacks(new BleServerCallbacks());
 
     BLEService *pService = this->getPServer()->createService(SERVICE_UUID);
 
+    // Instanciate the characteristic which is equivalent to a communication canal
+    // between the module and the paired devices
     this->setPCharacteristic(pService->createCharacteristic(
         CHARACTERISTIC_UUID,
         BLECharacteristic::PROPERTY_READ |
@@ -60,81 +69,7 @@ void BleInstance::init(void)
     this->setOldIsBleOn(true);
 }
 
-void BleServerCharacteristicCallbacks::onWrite(BLECharacteristic *pCharacteristic)
-{
-    String routerSsidReceived = "";
-    String routerPasswordReceived = "";
-    String privateIdReceived = "";
-
-    Serial.println("*********");
-
-    // Read the received value
-    std::string rawBLEValueReceived = bleInstance.getPCharacteristic()->getValue();
-
-    if (rawBLEValueReceived.length() > 0)
-    {
-        parseRawBLEValue(rawBLEValueReceived, &routerSsidReceived, &routerPasswordReceived, &privateIdReceived);
-
-        delay(500); //TODO: to reduce
-
-        //TODO: use type def constants for values to notify
-        // The privateId received match MODULE_PRIVATE_ID
-        // => the user is well trying to add this module
-        if (privateIdReceived == moduleConfig.getPrivateId())
-        {
-            Serial.println("Private Id received: OK");
-            // Test the internet router ids received
-            if (!connection2InternetRouter(routerSsidReceived, routerPasswordReceived))
-            {
-                Serial.println("[ERROR] Unable to connect to the internet router with the ids received");
-                Serial.println("val to notify: 0");
-                bleInstance.getPCharacteristic()->setValue("0");
-            }
-            else
-            {
-                moduleConfig.setRouterInfo(routerSsidReceived, routerPasswordReceived);
-
-                saveRouterInfoInSPIFFS();
-
-                // Router ids and private ids match => OK
-                // => turn off BLE mode
-                bleInstance.setIsBleOn(false);
-
-                Serial.println("Internet router ids received: OK");
-                Serial.println("val to notify: 1");
-                bleInstance.getPCharacteristic()->setValue("1");
-            }
-        }
-        else
-        {
-            Serial.println("[ERROR] Private id recevied: KO");
-            Serial.println("val to notify: 2");
-            bleInstance.getPCharacteristic()->setValue("2");
-        }
-
-        Serial.println("*********");
-    }
-    else
-    {
-        Serial.println("[ERROR] BLE value received is empty!");
-        Serial.println("val to notify: 3");
-        bleInstance.getPCharacteristic()->setValue("3");
-    }
-}
-
-void BleServerCallbacks::onConnect(BLEServer *pServer)
-{
-    Serial.println("BLE Connected");
-    bleInstance.setIsBleConnected(true);
-};
-
-void BleServerCallbacks::onDisconnect(BLEServer *pServer)
-{
-    Serial.println("BLE Disonnected");
-    bleInstance.setIsBleConnected(false);
-}
-
-void parseRawBLEValue(std::string rawBLEValueReceived, String *routerSsidReceived, String *routerPasswordReceived, String *privateIdReceived)
+void BleInstance::parseRawBLEValue(std::string rawBLEValueReceived, String *routerSsidReceived, String *routerPasswordReceived, String *privateIdReceived)
 {
     int n = 0;
 

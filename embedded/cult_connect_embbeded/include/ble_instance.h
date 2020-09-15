@@ -1,6 +1,6 @@
 //BLE: Bluetooth Low Energy
-#ifndef __BLE_H_
-#define __BLE_H_
+#ifndef __BLE_INSTANCE_H_
+#define __BLE_INSTANCE_H_
 
 #include <Arduino.h>
 
@@ -25,7 +25,7 @@ private:
     // Previous BLE connection with device state
     bool oldIsBleConnected;
 
-    // Characteristic on which will communicate
+    // Characteristic: equivalent to a communication canal between the module and the paired device
     BLECharacteristic *pCharacteristic;
 
     // BLE server representing the module on other devices
@@ -50,27 +50,10 @@ public:
     void setPServer();
     BLECharacteristic *getPCharacteristic(void);
     BLEServer *getPServer(void);
+
+    // TODO: use json
+    // Parse the internet router ids and the private id received by the paired device
+    void parseRawBLEValue(std::string rawBLEValueReceived, String *routerSsidReceived, String *routerPasswordReceived, String *privateIdReceived);
 };
-
-class BleServerCallbacks : public BLEServerCallbacks
-{
-public:
-    // Callback called when the module is connected to another device
-    void onConnect(BLEServer *pServer);
-
-    // Callback called when the module is disconnected
-    void onDisconnect(BLEServer *pServer);
-};
-
-class BleServerCharacteristicCallbacks : public BLECharacteristicCallbacks
-{
-public:
-    // Callback called when a value is received
-    void onWrite(BLECharacteristic *pCharacteristic);
-};
-
-// TODO: use json
-// Parse the internet router ids and the private id received by the paired device
-void parseRawBLEValue(std::string rawBLEValueReceived, String *routerSsidReceived, String *routerPasswordReceived, String *privateIdReceived);
 
 #endif

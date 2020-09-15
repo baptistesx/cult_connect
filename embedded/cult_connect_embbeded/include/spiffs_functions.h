@@ -5,6 +5,10 @@
 
 #include "SPIFFS.h"
 
+#include "air_humidity_sensor.h"
+#include "air_temperature_sensor.h"
+#include "brightness_sensor.h"
+
 // Path to the json configuration file into SPIFFS memory, from root directory
 #define CONFIG_FILE_PATH_IN_SPIFFS "/config.json"
 

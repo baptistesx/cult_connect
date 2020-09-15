@@ -12,7 +12,12 @@ BleInstance bleInstance;
 
 // Instance containing the module configuration
 Config moduleConfig;
+
+// Pointer to a futur DHT instance if necessary
+// Because we need to split the sensor in two => AirTemperatureSensor/AirHumiditySensor
+// Both containing this same DHT instance
 DHT *dhtTest;
+
 //First executed function when the module starts <=> initialisation
 void setup()
 {

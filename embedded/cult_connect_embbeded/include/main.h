@@ -21,7 +21,7 @@
 #include <WiFi.h>
 
 /****** Project private headers *****/
-#include "ble.h"
+#include "ble_instance.h"
 #include "connectivity.h"
 #include "initialisation.h"
 #include "spiffs_functions.h"
@@ -55,6 +55,7 @@ extern NTPClient timeClient;
 
 /***** Extern Websocketio variables *****/
 extern SocketIoClient webSocket;
+
 extern Config moduleConfig;
 
 #endif

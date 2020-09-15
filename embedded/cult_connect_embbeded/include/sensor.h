@@ -3,15 +3,6 @@
 
 #include <Arduino.h>
 
-// Library to work with DHT (humidity/temperature sensor)
-#include "DHT.h"
-
-// Adafruit library to work with various sensors
-#include <Adafruit_Sensor.h>
-
-// The TSL2561 is a luminosity sensor
-#include <Adafruit_TSL2561_U.h>
-
 // The content of the library Ticker has been extracted and use directly in th Sensor class
 // in order to be more flexible on the ISR
 
@@ -146,77 +137,6 @@ public:
     virtual int getDhtType(){};
 
     virtual String toString(){};
-};
-
-// Specific class for temperature sensor
-// Allow to add attributes and methods to the DHT object
-class AirTemperatureSensor : public Sensor
-{
-private:
-    // DHT : Digital Humidity and Temperature sensor
-    DHT *sensor;
-
-    // uC pin on which is connected the sensor
-    int dhtPin;
-
-    // DHT11 or DHT22
-    int dhtType;
-
-public:
-    AirTemperatureSensor(DHT *dhtSensor, int dhtType, int pin, String id, String type, uint32_t timer, uint32_t repeat = 0, resolution_t resolution = MILLIS);
-
-    int getDhtPin(void);
-    int getDhtType(void);
-
-    // Realize the temperature measure
-    float getMeasure(void) override;
-
-    String toString(void) override;
-};
-
-// Specific class for temperature sensor
-// Allow to add attributes and methods to the DHT object
-class AirHumiditySensor : public Sensor
-{
-private:
-    // DHT : Digital Humidity and Temperature sensor
-    DHT *sensor;
-
-    // uC pin on which is connected the sensor
-    int dhtPin;
-
-    // DHT11 or DHT22
-    int dhtType;
-
-public:
-    AirHumiditySensor(DHT *dhtSensor, int dhtType, int pin, String id, String type, uint32_t timer, uint32_t repeat = 0, resolution_t resolution = MILLIS);
-
-    int getDhtPin(void);
-    int getDhtType(void);
-
-    // Realize the humidity measure
-    float getMeasure(void) override;
-
-    String toString(void) override;
-};
-
-// Specific class for brightness sensor
-// Allows to add attributes and methods to the Adafruit_TSL2561_Unified sensor
-class BrightnessSensor : public Sensor
-{
-private:
-    Adafruit_TSL2561_Unified sensor;
-
-public:
-    BrightnessSensor(String id, String type, uint32_t timer, uint32_t repeat = 0, resolution_t resolution = MILLIS);
-
-    // Initialize the sensor
-    int init();
-
-    // Realize the measure
-    float getMeasure(void) override;
-
-    String toString(void) override;
 };
 
 #endif

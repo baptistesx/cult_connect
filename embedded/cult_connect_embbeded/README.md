@@ -34,3 +34,25 @@ Questions:
 - Comment organiser les repertoires du projet?
 
 - Comment gérer les dépendances exterieures?
+
+
+Recommandations de paul:
+
+- Il faut proscrire des noms de variable globales qui serait réutilisées pour des variables locales ou des paramètres (je pense notamment à pCharacteristic utilisée en variable globale et en paramètres)
+
+- mettre les déclarations de fonctions dans le meme ordre que dans le.h
+
+- Après il faut limiter au plus que possible les variables globales qui sont dépendantes d'une instance de classe, genre est-ce que deviceConnected ne pourrait pas être plutôt un membre de MyServerCallbacks ? (peut-être que c'est pas possible ?)
+
+- De même si tes variables locales n'ont qu'une portée sur ce fichier (ce qui est le cas) il est bon d'ajouter le mot clé static devant les variables pour limiter leur visibilité
+
+- Evite les noms :
+```
+std::string value = "0";
+std::string old_value = "0";
+```
+qui sont beaucoup trop génériques pour des variables globales
+
+- gestion cas d'erreur
+
+- voir: https://www.ssi.gouv.fr/uploads/2020/05/anssi-guide-regles_de_programmation_pour_le_developpement_securise_de_logiciels_en_langage_c-v1.2.pdf
