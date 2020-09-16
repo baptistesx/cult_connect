@@ -13,6 +13,7 @@ bool connection2InternetRouter(String ssid, String password);
 /* Return
         - true: Wifi status connected
         - false: else
+*/
 bool isInternetConnected(void);
 
 #endif
