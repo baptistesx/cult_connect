@@ -3,8 +3,8 @@
 
 void resetButtonInterrupt()
 {
-  int pressedTime;
-  int reading = digitalRead(moduleConfig.getResetButtonPin());
+  uint32_t pressedTime;
+  uint32_t reading = digitalRead(moduleConfig.getResetButtonPin());
   if (reading != HIGH)
   {
     moduleConfig.setLastDebounceTime(millis()); //reset the debouncing timer

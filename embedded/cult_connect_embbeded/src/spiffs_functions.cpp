@@ -80,7 +80,7 @@ void resetSPIFFS()
 
     JsonArray sensors = doc.createNestedArray("sensors");
 
-    for (int i = 0; i < moduleConfig.getNbSensors(); i++)
+    for (uint8_t i = 0; i < moduleConfig.getNbSensors(); i++)
     {
         JsonObject sensor = sensors.createNestedObject();
 
@@ -106,7 +106,7 @@ void resetSPIFFS()
     Serial.println(readFile(SPIFFS, CONFIG_FILE_PATH_IN_SPIFFS));
 }
 
-int configureModule(void)
+uint8_t configureModule(void)
 {
     // Read json configuration file
     String rawConfig = readFile(SPIFFS, CONFIG_FILE_PATH_IN_SPIFFS);
@@ -117,7 +117,7 @@ int configureModule(void)
         return parseConfig(rawConfig);
 }
 
-int saveRouterInfoInSPIFFS(void)
+uint8_t saveRouterInfoInSPIFFS(void)
 {
     File file = SPIFFS.open(CONFIG_FILE_PATH_IN_SPIFFS, FILE_WRITE);
 
@@ -136,7 +136,7 @@ int saveRouterInfoInSPIFFS(void)
 
     JsonArray sensors = doc.createNestedArray("sensors");
 
-    for (int i = 0; i < moduleConfig.getNbSensors(); i++)
+    for (uint8_t i = 0; i < moduleConfig.getNbSensors(); i++)
     {
         JsonObject sensor = sensors.createNestedObject();
 
@@ -160,7 +160,7 @@ int saveRouterInfoInSPIFFS(void)
     }
 }
 
-int parseConfig(String config)
+uint8_t parseConfig(String config)
 {
     // TODO: Recheck capacity
     const size_t capacity = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(9) + 310;
@@ -179,7 +179,7 @@ int parseConfig(String config)
 
     // The input needs to be a char* => cast from String to char*
     // +1 for EOL
-    int configLength = config.length() + 1;
+    uint32_t configLength = config.length() + 1;
     char json[configLength];
     config.toCharArray(json, configLength);
 
@@ -209,18 +209,18 @@ int parseConfig(String config)
     bool DhtAlreadyInstanciated = false;
 
     // Fetch the nested sensors
-    for (int i = 0; i < moduleConfig.getNbSensors(); i++)
+    for (uint8_t i = 0; i < moduleConfig.getNbSensors(); i++)
     {
         JsonObject sensor = doc["sensors"][i];
         const char *sensorType = sensor["type"];
         const char *sensorId = sensor["id"];
-        int sensorIntervalMeasure = sensor["intervalMeasure"];
+        uint32_t sensorIntervalMeasure = sensor["intervalMeasure"];
 
         // Fetch specific sensors infos for each sensor
         if (String(sensorType) == "temperature" || String(sensorType) == "humidity")
         {
-            int sensorPin = sensor["pin"];
-            int sensorDhtType = sensor["dhtType"];
+            uint8_t sensorPin = sensor["pin"];
+            uint8_t sensorDhtType = sensor["dhtType"];
             if (!DhtAlreadyInstanciated)
             {
                 dhtTest = new DHT(sensorPin, sensorDhtType);

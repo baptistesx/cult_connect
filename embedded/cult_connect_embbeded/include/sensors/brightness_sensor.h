@@ -21,7 +21,7 @@ public:
     ~BrightnessSensor();
 
     // Initialize the sensor
-    int init();
+    uint8_t init();
 
     // Realize the measure
     float getMeasure(void) override;

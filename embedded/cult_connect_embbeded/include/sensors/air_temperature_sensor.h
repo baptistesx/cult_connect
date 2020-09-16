@@ -16,17 +16,17 @@ private:
     DHT *sensor;
 
     // uC pin on which is connected the sensor
-    int dhtPin;
+    uint8_t dhtPin;
 
     // DHT11 or DHT22
-    int dhtType;
+    uint8_t dhtType;
 
 public:
-    AirTemperatureSensor(DHT *dhtSensor, int dhtType, int pin, String id, String type, uint32_t timer, uint32_t repeat = 0, resolution_t resolution = MILLIS);
+    AirTemperatureSensor(DHT *dhtSensor, uint8_t dhtType, uint8_t pin, String id, String type, uint32_t timer, uint32_t repeat = 0, resolution_t resolution = MILLIS);
     ~AirTemperatureSensor();
 
-    int getDhtPin(void);
-    int getDhtType(void);
+    uint8_t getDhtPin(void);
+    uint8_t getDhtType(void);
 
     // Realize the temperature measure
     float getMeasure(void) override;

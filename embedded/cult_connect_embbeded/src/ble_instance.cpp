@@ -71,13 +71,13 @@ void BleInstance::init(void)
 
 void BleInstance::parseRawBLEValue(std::string rawBLEValueReceived, String *routerSsidReceived, String *routerPasswordReceived, String *privateIdReceived)
 {
-    int n = 0;
+    uint8_t n = 0;
 
     Serial.print("New rawBLEValueReceived: ");
 
     //TODO: use json
     // Raw format: ssid;password;privateId
-    for (int i = 0; i < rawBLEValueReceived.length(); i++)
+    for (uint32_t i = 0; i < rawBLEValueReceived.length(); i++)
     {
         Serial.print(rawBLEValueReceived[i]);
         if (rawBLEValueReceived[i] == ';')

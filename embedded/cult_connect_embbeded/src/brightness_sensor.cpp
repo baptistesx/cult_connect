@@ -3,7 +3,7 @@
 BrightnessSensor::BrightnessSensor(String id, String type, uint32_t timer, uint32_t repeat, resolution_t resolution) : Sensor(id, type, timer, repeat, resolution), sensor(TSL2561_ADDR_FLOAT, 12345) {}
 BrightnessSensor::~BrightnessSensor() {}
 
-int BrightnessSensor::init()
+uint8_t BrightnessSensor::init()
 {
     //use brightnessSensor.begin() to default to Wire,
     //brightnessSensor.begin(&Wire2) directs api to use Wire2, etc.
@@ -51,7 +51,7 @@ int BrightnessSensor::init()
 
 float BrightnessSensor::getMeasure(void)
 {
-    int i = 0;
+    uint32_t i = 0;
     do
     {
         /* Get a new sensor event */
@@ -67,7 +67,7 @@ float BrightnessSensor::getMeasure(void)
             /* If brightnessSensorEvent.light = 0 lux the sensor is probably saturated
          and no reliable data could be generated! */
             Serial.println("Réinitialisation du light sensor");
-            int res = this->init();
+            uint32_t res = this->init();
             if (res == 1)
             {
                 //TODO: handle error

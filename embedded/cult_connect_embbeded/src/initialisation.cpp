@@ -2,7 +2,7 @@
 
 void startSensorsTimers(void)
 {
-  for (int i = 0; i < moduleConfig.getNbSensors(); i++)
+  for (uint8_t i = 0; i < moduleConfig.getNbSensors(); i++)
   {
     moduleConfig.sensors[i]->setISR();
   }

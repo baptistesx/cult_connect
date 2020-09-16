@@ -44,16 +44,16 @@ void resetSPIFFS(void);
         - 1: failed to read file or empty file
         - 2: failed to deserizalize Json file
 */
-int configureModule(void);
+uint8_t configureModule(void);
 
 /* Parse the config raw String and configure the moduleConfig global instance
     Return:
         - 2: failed to deserizalize Json file
         - 0: OK
 */
-int parseConfig(String config);
+uint8_t parseConfig(String config);
 
 // Save router info into SPIFFS memory
-int saveRouterInfoInSPIFFS(void);
+uint8_t saveRouterInfoInSPIFFS(void);
 
 #endif

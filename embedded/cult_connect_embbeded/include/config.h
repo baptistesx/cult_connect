@@ -19,7 +19,7 @@ private:
     String id;
     String name;
     String privateId;
-    int nbSensors;
+    uint8_t nbSensors;
 
 public:
     // TODO: needs to be private?
@@ -45,8 +45,8 @@ public:
     String getId();
     String getName();
     String getPrivateId();
-    int getNbSensors();
-    void setSensorsSize(int size);
+    uint8_t getNbSensors();
+    void setSensorsSize(uint8_t size);
     String toString();
 };
 

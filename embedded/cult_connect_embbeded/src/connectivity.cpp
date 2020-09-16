@@ -2,7 +2,7 @@
 
 bool connection2InternetRouter(String ssid, String password)
 {
-    int internetConnectionTimeout = 0;
+    uint8_t internetConnectionTimeout = 0;
 
     //Initialize the connection
     //c_str() method that converts the content of a string as a c-style => pointer on a char array

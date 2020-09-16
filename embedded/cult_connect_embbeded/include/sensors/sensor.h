@@ -127,14 +127,14 @@ public:
     String getType(void);
 
     // Once the measure is realized, send data to the server to store them
-    int sendSensorData2Server();
+    uint8_t sendSensorData2Server();
 
     // Virutal method that specific sensors will implement
     virtual float getMeasure(void){};
 
     // TODO: move to TemperatureSensor class but when  loop on moduleConfig.sensors =>issue cause it iterates on Sensor objects and not on specific sensors
-    virtual int getDhtPin(){};
-    virtual int getDhtType(){};
+    virtual uint8_t getDhtPin(){};
+    virtual uint8_t getDhtType(){};
 
     virtual String toString(){};
 };

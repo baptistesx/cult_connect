@@ -7,7 +7,7 @@ void socketConnected(const char *payload, size_t length)
     tempId += String(moduleConfig.getName());
     tempId += "\"";
 
-    int tempId_len = tempId.length() + 1;
+    uint32_t tempId_len = tempId.length() + 1;
     char id[tempId_len];
     tempId.toCharArray(id, tempId_len);
 

@@ -45,7 +45,7 @@ uint8_t Config::getSocketStatusLedPin(void) { return this->SOCKET_STATUS_LED_PIN
 
 String Config::getRouterSSID() { return this->routerSSID; }
 
-int Config::getNbSensors() { return this->nbSensors; }
+uint8_t Config::getNbSensors() { return this->nbSensors; }
 
 String Config::getRouterPassword() { return this->routerPassword; }
 
@@ -60,7 +60,7 @@ String Config::toString()
     return "routerSSId: " + this->getRouterSSID() + " ; routerPassword: " + this->getRouterPassword() + " ; id: " + this->getId() + " ; name: " + this->getName() + " ; privateId: " + this->getPrivateId() + "; nbSensors: " + String(this->getNbSensors()) + "; button pin:" + String(this->getResetButtonPin()) + "; ble led:" + String(this->getBleStatusLedPin()) + ";socket led:" + String(this->getSocketStatusLedPin());
 }
 
-void Config::setSensorsSize(int size)
+void Config::setSensorsSize(uint8_t size)
 {
     this->nbSensors = size;
     this->sensors.reserve(size);

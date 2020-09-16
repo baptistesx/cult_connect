@@ -1,6 +1,6 @@
 #include "sensors/air_temperature_sensor.h"
 
-AirTemperatureSensor::AirTemperatureSensor(DHT *dhtSensor, int dhtType, int pin, String id, String type, uint32_t timer, uint32_t repeat, resolution_t resolution) : Sensor(id, type, timer, repeat, resolution)
+AirTemperatureSensor::AirTemperatureSensor(DHT *dhtSensor, uint8_t dhtType, uint8_t pin, String id, String type, uint32_t timer, uint32_t repeat, resolution_t resolution) : Sensor(id, type, timer, repeat, resolution)
 {
     this->sensor = dhtSensor;
     this->dhtPin = pin;
@@ -16,9 +16,9 @@ float AirTemperatureSensor::getMeasure(void)
     float temperature = this->sensor->readTemperature();
     return isnan(temperature) ? -1 : temperature;
 }
-int AirTemperatureSensor::getDhtPin(void) { return this->dhtPin; }
+uint8_t AirTemperatureSensor::getDhtPin(void) { return this->dhtPin; }
 
-int AirTemperatureSensor::getDhtType(void) { return this->dhtType; }
+uint8_t AirTemperatureSensor::getDhtType(void) { return this->dhtType; }
 
 String AirTemperatureSensor::toString(void)
 {

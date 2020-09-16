@@ -75,7 +75,7 @@ void Sensor::pause()
     status = PAUSED;
 }
 
-int Sensor::sendSensorData2Server()
+uint8_t Sensor::sendSensorData2Server()
 {
     if (isInternetConnected())
     {
@@ -105,7 +105,7 @@ void Sensor::update()
 {
     if (tick())
     {
-        int res = this->sendSensorData2Server();
+        uint8_t res = this->sendSensorData2Server();
 
         switch (res)
         {

@@ -42,8 +42,6 @@ Recommandations de paul:
 
 - attention longueur chaine de caractères
 
-- utiliser unsigned int ou signed int  à la place de juste int
-
 -Pour les variables globales qui ont une porté qui s'arrête au fichier utilise le mot "static"
 
 - gestion cas d'erreur
