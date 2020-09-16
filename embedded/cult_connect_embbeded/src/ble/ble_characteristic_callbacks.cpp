@@ -1,4 +1,4 @@
-#include "ble_characteristic_callbacks.h"
+#include "ble/ble_characteristic_callbacks.h"
 #include "main.h"
 
 BleServerCharacteristicCallbacks::BleServerCharacteristicCallbacks() {}

@@ -1,7 +1,7 @@
-#include "ble_instance.h"
+#include "ble/ble_instance.h"
 #include "main.h"
-#include "ble_server_callbacks.h"
-#include "ble_characteristic_callbacks.h"
+#include "ble/ble_server_callbacks.h"
+#include "ble/ble_characteristic_callbacks.h"
 
 BleInstance::BleInstance()
 {

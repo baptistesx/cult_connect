@@ -21,7 +21,7 @@
 #include <WiFi.h>
 
 /****** Project private headers *****/
-#include "ble_instance.h"
+#include "ble/ble_instance.h"
 #include "connectivity.h"
 #include "initialisation.h"
 #include "spiffs_functions.h"

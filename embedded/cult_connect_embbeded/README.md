@@ -44,8 +44,6 @@ Recommandations de paul:
 
 -Pour les variables globales qui ont une porté qui s'arrête au fichier utilise le mot "static"
 
-- gestion cas d'erreur
-
 - utiliser struct pour passage AirTemperatureSenor constructor par exemple
 
 - mettre les déclarations de fonctions dans le meme ordre que dans le.h
