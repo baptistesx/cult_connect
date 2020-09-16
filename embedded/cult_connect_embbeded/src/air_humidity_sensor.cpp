@@ -1,4 +1,4 @@
-#include "air_humidity_sensor.h"
+#include "sensors/air_humidity_sensor.h"
 
 AirHumiditySensor::AirHumiditySensor(DHT *dhtSensor, int dhtType, int pin, String id, String type, uint32_t timer, uint32_t repeat, resolution_t resolution) : Sensor(id, type, timer, repeat, resolution)
 {

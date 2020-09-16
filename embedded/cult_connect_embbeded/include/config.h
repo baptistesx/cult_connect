@@ -2,7 +2,7 @@
 #define __CONFIG_H_
 
 #include "Arduino.h"
-#include "sensor.h"
+#include "sensors/sensor.h"
 #include <vector>
 
 // Class containing all module infos and the sensors the module contains

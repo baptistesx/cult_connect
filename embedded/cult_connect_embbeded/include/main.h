@@ -29,7 +29,7 @@
 #include "web_socket_io.h"
 #include "SocketIoClient.h"
 #include "config.h"
-#include "sensor.h"
+#include "sensors/sensor.h"
 
 /****** BLE (Bluetooth Low Energy) constants and extern variables *****/
 // TODO: put these two constants in the bleInstance?

@@ -1,4 +1,4 @@
-#include "sensor.h"
+#include "sensors/sensor.h"
 #include "config.h"
 #include "connectivity.h"
 

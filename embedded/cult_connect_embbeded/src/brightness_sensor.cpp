@@ -1,4 +1,4 @@
-#include "brightness_sensor.h"
+#include "sensors/brightness_sensor.h"
 
 BrightnessSensor::BrightnessSensor(String id, String type, uint32_t timer, uint32_t repeat, resolution_t resolution) : Sensor(id, type, timer, repeat, resolution), sensor(TSL2561_ADDR_FLOAT, 12345) {}
 BrightnessSensor::~BrightnessSensor() {}

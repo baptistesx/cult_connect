@@ -1,4 +1,4 @@
-#include "air_temperature_sensor.h"
+#include "sensors/air_temperature_sensor.h"
 
 AirTemperatureSensor::AirTemperatureSensor(DHT *dhtSensor, int dhtType, int pin, String id, String type, uint32_t timer, uint32_t repeat, resolution_t resolution) : Sensor(id, type, timer, repeat, resolution)
 {

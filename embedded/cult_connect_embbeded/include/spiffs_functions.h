@@ -5,9 +5,9 @@
 
 #include "SPIFFS.h"
 
-#include "air_humidity_sensor.h"
-#include "air_temperature_sensor.h"
-#include "brightness_sensor.h"
+#include "sensors/air_humidity_sensor.h"
+#include "sensors/air_temperature_sensor.h"
+#include "sensors/brightness_sensor.h"
 
 // Path to the json configuration file into SPIFFS memory, from root directory
 #define CONFIG_FILE_PATH_IN_SPIFFS "/config.json"
@@ -39,11 +39,19 @@ void resetSPIFFS(void);
         - sensors: array of sensors with their infos
 
     The file is read and parsed in order to initialize the moduleConfig global instance
+    Return:
+        - 0: OK
+        - 1: failed to read file or empty file
+        - 2: failed to deserizalize Json file
 */
 int configureModule(void);
 
-// Parse the config raw String and configure the moduleConfig global instance
-int parseConfig(String rawConfig);
+/* Parse the config raw String and configure the moduleConfig global instance
+    Return:
+        - 2: failed to deserizalize Json file
+        - 0: OK
+*/
+int parseConfig(String config);
 
 // Save router info into SPIFFS memory
 int saveRouterInfoInSPIFFS(void);

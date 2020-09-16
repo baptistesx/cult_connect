@@ -7,7 +7,7 @@
 // The TSL2561 is a luminosity sensor
 #include <Adafruit_TSL2561_U.h>
 
-#include "sensor.h"
+#include "sensors/sensor.h"
 
 // Specific class for brightness sensor
 // Allows to add attributes and methods to the Adafruit_TSL2561_Unified sensor

@@ -38,21 +38,22 @@ Questions:
 
 Recommandations de paul:
 
-- Il faut proscrire des noms de variable globales qui serait réutilisées pour des variables locales ou des paramètres (je pense notamment à pCharacteristic utilisée en variable globale et en paramètres)
+- usage du mot clé const sur les paramètres de type pointeur dans des fonctions qui ne modifient pas la zone mémoire en question.
+
+- attention longueur chaine de caractères
+
+- utiliser unsigned int ou signed int  à la place de juste int
+
+-Pour les variables globales qui ont une porté qui s'arrête au fichier utilise le mot "static"
+
+- gestion cas d'erreur
+
+- utiliser struct pour passage AirTemperatureSenor constructor par exemple
 
 - mettre les déclarations de fonctions dans le meme ordre que dans le.h
 
 - Après il faut limiter au plus que possible les variables globales qui sont dépendantes d'une instance de classe, genre est-ce que deviceConnected ne pourrait pas être plutôt un membre de MyServerCallbacks ? (peut-être que c'est pas possible ?)
 
 - De même si tes variables locales n'ont qu'une portée sur ce fichier (ce qui est le cas) il est bon d'ajouter le mot clé static devant les variables pour limiter leur visibilité
-
-- Evite les noms :
-```
-std::string value = "0";
-std::string old_value = "0";
-```
-qui sont beaucoup trop génériques pour des variables globales
-
-- gestion cas d'erreur
 
 - voir: https://www.ssi.gouv.fr/uploads/2020/05/anssi-guide-regles_de_programmation_pour_le_developpement_securise_de_logiciels_en_langage_c-v1.2.pdf
