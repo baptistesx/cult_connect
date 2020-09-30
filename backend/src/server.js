@@ -1,4 +1,3 @@
-//Principes SOLID
 //Middleware
 //Validation (Celebrate, joi)
 //TODO: créer fichier de log (écrire dans un fichier: date, heure, commande, resultat)
@@ -26,15 +25,17 @@
 var express = require("express");
 var app = express();
 var http = require("http");
+const mainMiddleware = require("./api/middlewares/index")
 var bodyParser = require("body-parser");
-var mongo = require("./project_modules/mongo_mod");
 
-app.use(bodyParser.urlencoded({
-  extended: false
-}));
+app.use(
+  bodyParser.urlencoded({
+    extended: false
+  })
+);
 
 //Routes pour singup et signin
-const authRoutes = require('./api/routes/authentification')
+const authRoutes = require('./api/routes/auth')
 app.use('/api', authRoutes)
 
 // Les routes pour les modules

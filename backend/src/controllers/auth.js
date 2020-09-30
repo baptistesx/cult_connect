@@ -1,4 +1,4 @@
-var mongo = require("../../project_modules/mongo_mod");
+var mongo = require("../project_modules/mongo_mod");
 
 exports.signup = (req, res, next) => {
     var email = req.body.email;

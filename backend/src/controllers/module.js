@@ -1,7 +1,7 @@
-var mongo = require("../../project_modules/mongo_mod");
+var mongo = require("../project_modules/mongo_mod");
 const KEY = "m yincredibl y(!!1!11!)zpG6z2s8)Key'!";
 var jwt = require("jsonwebtoken");
-var controler = require("../../project_modules/control_mod");
+var controler = require("../project_modules/control_mod");
 
 exports.addModule = (req, res, next) => {
     console.log("new request: /api/user/addModule");

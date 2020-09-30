@@ -1,5 +1,5 @@
-var mongo = require("../../project_modules/mongo_mod");
-var controler = require("../../project_modules/control_mod");
+var mongo = require("../project_modules/mongo_mod");
+var controler = require("../project_modules/control_mod");
 var jwt = require("jsonwebtoken");
 const KEY = "m yincredibl y(!!1!11!)zpG6z2s8)Key'!";
 
