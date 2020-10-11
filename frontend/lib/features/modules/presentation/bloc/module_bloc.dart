@@ -126,7 +126,6 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
       await event.characteristic.write(event.val2Send);
 
       var value = await event.characteristic.read();
-      print(value);
       if (value[0] == "1".codeUnitAt(0)) {
         final failureOrUser = await addModule(event.addModuleParams);
         yield* _eitherLoadedOrErrorState(failureOrUser);

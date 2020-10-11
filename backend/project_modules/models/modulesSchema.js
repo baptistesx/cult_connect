@@ -5,6 +5,7 @@ var Schema = mongoose.Schema,
 const modulesSchema = new Schema({
   publicID: String,
   privateID: String,
+  state: Boolean,
   name: String,
   place: String,
   used: Boolean,

@@ -20,19 +20,25 @@ class AddModuleForm extends StatelessWidget {
   final _addModuleFormKey = GlobalKey<FormState>();
 
   final routerSsidController = TextEditingController(
-      // text: globalUser.routerSsid == null
-      //     ? ""
-      //     : (globalUser.routerSsid.isEmpty ? "" : globalUser.routerSsid)
-      );
+      text: globalUser.routerSsid == null
+          ? ""
+          : (globalUser.routerSsid.isEmpty ? "" : globalUser.routerSsid));
   final routerPasswordController = TextEditingController(
-      // text: globalUser.routerPassword == null
-      //     ? ""
-      //     : (globalUser.routerPassword.isEmpty
-      //         ? ""
-      //         : globalUser.routerPassword)
-      );
+      text: globalUser.routerPassword == null
+          ? ""
+          : (globalUser.routerPassword.isEmpty
+              ? ""
+              : globalUser.routerPassword));
 
-  WifiParams wifiParams = WifiParams(routerSsid: "", routerPassword: "");
+  WifiParams wifiParams = WifiParams(
+      routerSsid: globalUser.routerSsid == null
+          ? ""
+          : (globalUser.routerSsid.isEmpty ? "" : globalUser.routerSsid),
+      routerPassword: globalUser.routerPassword == null
+          ? ""
+          : (globalUser.routerPassword.isEmpty
+              ? ""
+              : globalUser.routerPassword));
 
   AddModuleParams addModuleParams = AddModuleParams(
     publicId: "",
@@ -45,6 +51,7 @@ class AddModuleForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("ssid: " + globalUser.routerSsid);
     return BlocConsumer<ModuleBloc, ModuleState>(
       listener: (context, state) async {
         if (state is Error) {
@@ -192,7 +199,6 @@ class AddModuleForm extends StatelessWidget {
                                 ),
                                 onChanged: (value) {
                                   addModuleParams.privateId = value;
-                                  print(addModuleParams.privateId);
                                 },
                                 validator: (String privateId) {
                                   if (privateId.isEmpty)
@@ -236,7 +242,6 @@ class AddModuleForm extends StatelessWidget {
                               ),
                               BlocBuilder<ModuleBloc, ModuleState>(
                                 builder: (context, state) {
-                                  print(state);
                                   if (state is Empty ||
                                       state == null ||
                                       state is Error) {
@@ -249,7 +254,9 @@ class AddModuleForm extends StatelessWidget {
                                                 .validate()) {
                                               List<int> val2Send =
                                                   _getIdsInListOfInt();
-                                              print(val2Send);
+
+                                              FocusScope.of(context).unfocus();
+
                                               dispatchSendRouterIds2Module(
                                                   context,
                                                   characteristic,
@@ -288,9 +295,10 @@ class AddModuleForm extends StatelessWidget {
                                           onPressed: () async {
                                             if (_addModuleFormKey.currentState
                                                 .validate()) {
-                                              print(addModuleParams);
                                               List<int> val2Send =
                                                   _getIdsInListOfInt();
+
+                                              FocusScope.of(context).unfocus();
 
                                               dispatchSendRouterIds2Module(
                                                   context,

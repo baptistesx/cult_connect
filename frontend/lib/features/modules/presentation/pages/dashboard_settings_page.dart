@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 import '../../../login/presentation/bloc/bloc.dart';
 import '../../../login/presentation/bloc/login_bloc.dart';
@@ -28,11 +29,16 @@ class DashboardSettingsPage extends StatelessWidget {
                       }
                     },
                     builder: (context, state) {
-                      return FlatButton(
-                        onPressed: () {
-                          dispatchSignOut(context);
-                        },
-                        child: Text("Log out"),
+                      return Center(
+                        child: FlatButton(
+                          child: Row(mainAxisAlignment: MainAxisAlignment
+                                          .center, //Center Row contents horizontally,
+                            children: [Icon(MdiIcons.logout), Text("Logout")],
+                          ),
+                          onPressed: () {
+                            dispatchSignOut(context);
+                          },
+                        ),
                       );
                     },
                   );

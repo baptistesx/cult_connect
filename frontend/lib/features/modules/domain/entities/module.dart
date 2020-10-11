@@ -8,6 +8,7 @@ class Module extends Equatable {
   final String moduleId;
   final String publicId;
   final String privateId;
+  bool state;
   String name;
   String place;
   bool used;
@@ -18,6 +19,7 @@ class Module extends Equatable {
     @required this.moduleId,
     @required this.publicId,
     @required this.privateId,
+    @required this.state,
     @required this.name,
     @required this.place,
     @required this.used,
@@ -27,7 +29,7 @@ class Module extends Equatable {
 
   @override
   String toString() {
-    return 'Module(moduleId: $moduleId, publicId: $publicId, privateId: $privateId, name: $name, place: $place, used: $used, sensors: $sensors, actuators: $actuators)';
+    return 'Module(moduleId: $moduleId, publicId: $publicId, privateId: $privateId, state: $state, name: $name, place: $place, used: $used, sensors: $sensors, actuators: $actuators)';
   }
 }
 

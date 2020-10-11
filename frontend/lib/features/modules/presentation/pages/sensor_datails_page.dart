@@ -1,6 +1,7 @@
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../../../../core/network/socket_service.dart';
 import '../../../../injection_container.dart';
@@ -10,6 +11,7 @@ import '../../domain/entities/data.dart';
 import '../../domain/entities/sensor.dart';
 import '../bloc/bloc.dart';
 import 'dashboard_pages.dart';
+import 'package:intl/intl.dart';
 
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
@@ -21,8 +23,8 @@ class SensorDetailsPage extends StatelessWidget {
   SensorDetailsPage({
     Key key,
     this.data,
-  })  : sensor =
-            globalUser.modules[data["moduleIndex"]].sensors[data["sensorIndex"]],
+  })  : sensor = globalUser
+            .modules[data["moduleIndex"]].sensors[data["sensorIndex"]],
         super(key: key);
 
   @override
@@ -46,7 +48,7 @@ class SensorDetailsPage extends StatelessWidget {
         },
         builder: (context, state) {
           sl<SocketService>().changeContext(context);
-          
+
           return BlocBuilder<ModuleBloc, ModuleState>(
               builder: (context, state) {
             return Scaffold(
@@ -159,13 +161,21 @@ class SensorDetailsPage extends StatelessWidget {
                   ),
                   BlocBuilder<ModuleBloc, ModuleState>(
                       builder: (context, state) {
-                    print("ddddd");
                     // if (state is Loaded) return Text("essai");
                     // print("before: $sensor");
                     // sensor = globalUser
                     //     .modules[data["moduleIndex"]].sensors[data["sensorId"]];
                     // print("after: $sensor");
-                    return getChartWidget();
+                    // return getChartWidget();
+                    SfCartesianChart chart = getNewChart();
+                    FlatButton resetButton = FlatButton(
+                        child: Text("Reset zoom"),
+                        onPressed: () {
+                          chart.zoomPanBehavior.reset();
+                        });
+                    return Column(
+                      children: [chart, resetButton],
+                    );
                     // return chartWidget;
                   }),
                 ],
@@ -177,8 +187,85 @@ class SensorDetailsPage extends StatelessWidget {
     );
   }
 
+  SfCartesianChart getNewChart() {
+    return SfCartesianChart(
+        zoomPanBehavior: ZoomPanBehavior(
+          // Enables pinch zooming
+          enablePinching: true,
+          maximumZoomLevel: 20,
+          // enableDoubleTapZooming: true
+        ),
+        primaryXAxis: CategoryAxis(),
+        // Chart title
+        title: ChartTitle(
+          text: capitalize(sensor.dataType) + " (" + sensor.unit + ")",
+          // subTitle: 'Top sub-title text',
+          // behaviorPosition: charts.BehaviorPosition.top,
+          // titleOutsideJustification: charts.OutsideJustification.start,
+          // Set a larger inner padding than the default (10) to avoid
+          // rendering the text too close to the top measure axis tick label.
+          // The top tick label may extend upwards into the top margin region
+          // if it is located at the top of the draw area.
+          // innerPadding: 18
+        ),
+        // Enable legend
+        legend: Legend(
+          isVisible: true,
+          position: LegendPosition.bottom,
+        ),
+        // Enable tooltip
+        tooltipBehavior: TooltipBehavior(
+          enable: true,
+          format: 'point.x:  ' + 'point.y' + sensor.unit,
+          header: capitalize(sensor.dataType),
+        ),
+        series: <LineSeries<Data, String>>[
+          LineSeries<Data, String>(
+              dataSource: sensor.data,
+              xValueMapper: (Data clickData, _) =>
+                  DateFormat('EEE, MMM d, h:mm a').format(clickData.date),
+              yValueMapper: (Data clickData, _) => clickData.value,
+              // Enable data label
+              dataLabelSettings: DataLabelSettings(isVisible: false))
+        ]);
+  }
+
+  // SfCartesianChart getNewChart() {
+  //   return SfCartesianChart(
+  //       primaryXAxis: CategoryAxis(),
+  //       // Chart title
+  //       title: ChartTitle(
+  //         text: capitalize(sensor.dataType) + " (" + sensor.unit + ")",
+  //         // subTitle: 'Top sub-title text',
+  //         // behaviorPosition: charts.BehaviorPosition.top,
+  //         // titleOutsideJustification: charts.OutsideJustification.start,
+  //         // Set a larger inner padding than the default (10) to avoid
+  //         // rendering the text too close to the top measure axis tick label.
+  //         // The top tick label may extend upwards into the top margin region
+  //         // if it is located at the top of the draw area.
+  //         // innerPadding: 18
+  //       ),
+  //       // Enable legend
+  //       legend: Legend(isVisible: true),
+  //       // Enable tooltip
+  //       tooltipBehavior: TooltipBehavior(enable: true),
+  //       series: <LineSeries<SalesData, String>>[
+  //         LineSeries<SalesData, String>(
+  //             dataSource: <SalesData>[
+  //               SalesData('Jan', 35),
+  //               SalesData('Feb', 28),
+  //               SalesData('Mar', 34),
+  //               SalesData('Apr', 32),
+  //               SalesData('May', 40)
+  //             ],
+  //             xValueMapper: (SalesData sales, _) => sales.year,
+  //             yValueMapper: (SalesData sales, _) => sales.sales,
+  //             // Enable data label
+  //             dataLabelSettings: DataLabelSettings(isVisible: false))
+  //       ]);
+  // }
+
   Widget getChartWidget() {
-    print("sensor.data:"+sensor.data.toString());
     var series = [
       new charts.Series(
         id: 'Clicks',
@@ -234,4 +321,11 @@ class UpdateSensorParams {
   String newName;
 
   UpdateSensorParams({@required this.sensorId, @required this.newName});
+}
+
+class SalesData {
+  SalesData(this.year, this.sales);
+
+  final String year;
+  final double sales;
 }

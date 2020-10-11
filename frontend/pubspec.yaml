@@ -43,6 +43,10 @@ dependencies:
 
   socket_io_client: ^0.9.11
 
+  syncfusion_flutter_charts: ^18.2.59
+
+  intl: ^0.16.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

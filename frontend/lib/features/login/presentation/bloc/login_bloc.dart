@@ -100,7 +100,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             (jwtReceived) async* {
               jwt = jwtReceived;
               storage.write(key: "jwt", value: jwt);
-
+              print(jwt);
               final failureOrUser = await signIn(jwt);
               yield* _eitherLoadedOrErrorState(failureOrUser);
             },

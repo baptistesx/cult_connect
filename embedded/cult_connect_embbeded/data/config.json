@@ -1,6 +1,6 @@
 {
-    "routerSSID": "Martin Router King",
-    "routerPassword": "phelmaRPZ204",
+    "routerSSID": "",
+    "routerPassword": "",
     "id": "5e7a80125d33fe0d041ff8cb",
     "privateId": "123",
     "resetButtonPin": 32,
@@ -12,14 +12,14 @@
             "type": "temperature",
             "pin": 4,
             "dhtType": 22,
-            "intervalMeasure": 4
+            "intervalMeasure": 65
         },
         {
             "id": "5e81197a68819b45fce01001",
             "type": "humidity",
             "pin": 4,
             "dhtType": 22,
-            "intervalMeasure": 4
+            "intervalMeasure": 65
         }
     ]
 }

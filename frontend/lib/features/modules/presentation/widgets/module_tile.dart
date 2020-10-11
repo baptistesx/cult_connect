@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 import '../../../../main.dart';
 import '../../domain/entities/module.dart';
@@ -48,6 +49,7 @@ class ModuleTile extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       capitalModuleTitle(module.name),
+                      Icon(MdiIcons.powerStandby, color: module.state?Colors.green:Colors.red,),
                       IconButton(
                           icon: Icon(Icons.settings),
                           onPressed: () {

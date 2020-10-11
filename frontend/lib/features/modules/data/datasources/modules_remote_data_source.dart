@@ -85,8 +85,6 @@ class ModulesRemoteDataSourceImpl implements ModulesRemoteDataSource {
           'Authorization': jwt
         },
         body: body);
-        print(body);
-    print(response.body);
     if (response.statusCode.toString()[0] == "2") {
       return UserModel.fromJson(json.decode(response.body));
     } else {

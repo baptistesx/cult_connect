@@ -49,7 +49,6 @@ class _DashboardPagesState extends State<DashboardPages> {
 
   @override
   Widget build(BuildContext context) {
-    print(globalUser);
     initShowModulesSettingsArray();
 
     final List<Widget> _pages = <Widget>[
@@ -62,7 +61,11 @@ class _DashboardPagesState extends State<DashboardPages> {
         sl<SocketService>().changeContext(context);
       },
       builder: (context, state) {
-        sl<SocketService>().createSocketConnection(context);
+        if (sl<SocketService>().socket == null) {
+          sl<SocketService>().createSocketConnection(context);
+        } else {
+          sl<SocketService>().changeContext(context);
+        }
 
         return WillPopScope(
           onWillPop: () async => false,

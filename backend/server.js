@@ -39,6 +39,9 @@ const {
 const {
   sensors
 } = require("./project_modules/models/sensorsSchema");
+const {
+  modules
+} = require("./project_modules/models/modulesSchema");
 
 const KEY = "m yincredibl y(!!1!11!)zpG6z2s8)Key'!";
 
@@ -82,7 +85,8 @@ app.post("/api/signIn", function (req, res) {
   mongo.logUser(email, function (code, answer) {
     console.log(answer)
     res.status(code).send(answer);
-  });
+  })
+
 });
 
 //Route pour demande de jwt lors avant connexion
@@ -93,8 +97,10 @@ app.get("/api/getJWT/", function (req, res) {
   var password = req.query.pwd;
 
   mongo.getJWT(email, password, function (code, answer) {
+    console.log(answer)
     res.status(code).send(answer);
   });
+
 });
 
 //Route pour ajouter un module à l'utilisateur
@@ -624,6 +630,8 @@ function getSensorData(moduleId, sensor, callback) {
 // Chargement de socket.io
 var io = require('socket.io').listen(server);
 
+var clientsSockets = new Map();
+
 //Connection d'un nouveau client => nouvelle socket
 io.sockets.on('connection', function (socket) {
   var userId = ""
@@ -631,24 +639,44 @@ io.sockets.on('connection', function (socket) {
   //identification de la socket
   socket.on('identification', function (name) {
     socket.name = name
+    socket.dbId = name.split('_')[1]
     //Le client est un module
     if (name.split('_')[0] == "M") {
       mongo.getModuleOwnerById(name.split('_')[1], function (user) {
-        //Le module rejoint la room correspondant a l'id de
-        // son utilisateur
-        userId = user._id
-        console.log("module joining room " + userId)
-        socket.join(userId)
+        //TODO: handle user = null case
+
+        if (user != null) {
+          //Le module rejoint la room correspondant a l'id de
+          // son utilisateur
+          userId = user._id
+          moduleId = socket.dbId
+          clientsSockets.set(socket.id, moduleId)
+          console.log("module " + moduleId + " joining room " + userId)
+          socket.join(userId)
+          modules.findOne({
+            _id: moduleId
+          }, function (err, module) {
+            module.state = true;
+            module.save()
+            console.log("emitting new module connected")
+            socket.to(userId).emit("newModuleConnected", moduleId);
+          })
+        } else {
+          console.log("[EEEERRROOOR] no user found");
+        }
+
       })
 
       //Le module envoie une nouvelle data
       socket.on('newDataFromModule', function (dataReceived) {
         var res = dataReceived.replace(/'/g, "\"")
         var dataParsed = JSON.parse(res)
+        console.log(dataParsed)
+
         sensors.findOne({
           _id: dataParsed.sensorId
         }, function (err, sensor) {
-          console.log(dataParsed.data)
+          console.log("newDataFromModule: %j", dataParsed.data)
           sensor.data.push(dataParsed.data)
 
           //Sauvegarde de la data en base de données
@@ -665,9 +693,7 @@ io.sockets.on('connection', function (socket) {
     }
     //Le client est un utilisateur 
     else if (name.split('_')[0] == "USER") {
-      console.log(name)
-      // console.log("user jwt: " + name.split('_')[1])
-      var email = jwt.verify(name.split('_')[1].toString(), KEY, {
+      var email = jwt.verify(name.split('USER_')[1].toString(), KEY, {
         algorithm: "HS256"
       }).email;
 
@@ -678,7 +704,26 @@ io.sockets.on('connection', function (socket) {
           //L'utilisateur rejoint la room correspondant a son id
           console.log("user joining room " + userId)
 
+          clientsSockets.set(socket.id, userId)
+
           socket.join(userId)
+
+          var list2send = []
+          io.of('/').in(userId).clients(function (error, clients) {
+              var numClients = clients.length;
+
+              clients.forEach(element => {
+                if (clientsSockets.get(element) != userId) {
+                  list2send.push(clientsSockets.get(element))
+                }
+              });
+              console.log(JSON.stringify(list2send))
+              console.log("emiittiing connected modules");
+              socket.emit('connectedModules', JSON.stringify(list2send))
+            }
+
+          );
+
         } else {
           console.log("user null")
           //TODO: handle error
@@ -691,7 +736,20 @@ io.sockets.on('connection', function (socket) {
 
   });
   socket.on('disconnect', () => {
-    console.log(socket.name + "disconnect");
+    var moduleId = socket.dbId
+
+    if (socket.name.split('_')[0] == "M") {
+      console.log(socket.name + " disconnect");
+      modules.findOne({
+        _id: moduleId
+      }, function (err, module) {
+        module.state = false;
+        module.save()
+
+        socket.to(userId).emit("newModuleDisconnected", moduleId);
+      })
+    }
+
   });
 });
 

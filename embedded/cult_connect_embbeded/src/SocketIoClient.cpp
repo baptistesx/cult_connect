@@ -95,7 +95,7 @@ void SocketIoClient::loop()
 		if (_webSocket.sendTXT(*packet))
 		{
 			//TODO: to uncomment?
-			// SOCKETIOCLIENT_DEBUG("[SIoC] packet \"%s\" emitted\n", packet->c_str());
+			SOCKETIOCLIENT_DEBUG("[SIoC] packet \"%s\" emitted\n", packet->c_str());
 			packet = _packets.erase(packet);
 		}
 		else
@@ -128,7 +128,7 @@ void SocketIoClient::emit(const char *event, const char *payload)
 	}
 	msg += "]";
 	//TODO: to uncomment?
-	// SOCKETIOCLIENT_DEBUG("[SIoC] add packet %s\n", msg.c_str());
+	SOCKETIOCLIENT_DEBUG("[SIoC] add packet %s\n", msg.c_str());
 	_packets.push_back(msg);
 }
 
@@ -142,7 +142,7 @@ void SocketIoClient::remove(const char *event)
 	else
 	{
 		//TODO: to uncomment?
-		// SOCKETIOCLIENT_DEBUG("[SIoC] event %s not found, can not be removed", event);
+		SOCKETIOCLIENT_DEBUG("[SIoC] event %s not found, can not be removed", event);
 	}
 }
 
@@ -157,7 +157,7 @@ void SocketIoClient::trigger(const char *event, const char *payload, size_t leng
 	else
 	{
 		//TODO: to uncomment?
-		// SOCKETIOCLIENT_DEBUG("[SIoC] event %s not found. %d events available\n", event, _events.size());
+		SOCKETIOCLIENT_DEBUG("[SIoC] event %s not found. %d events available\n", event, _events.size());
 	}
 }
 

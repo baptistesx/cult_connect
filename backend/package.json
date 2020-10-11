@@ -19,7 +19,7 @@
     "mongodb": "^3.5.5",
     "mongoose": "^5.9.6",
     "nodemailer": "^6.4.11",
-    "nodemon": "^2.0.2",
+    "nodemon": "^2.0.4",
     "socket.io": "^2.3.0",
     "ws": "^7.3.1"
   }

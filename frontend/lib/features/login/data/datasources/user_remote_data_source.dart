@@ -26,7 +26,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     final String url =
         "$SERVER_IP/api/getJWT/?email=$emailAddress&pwd=$password";
     final response = await client.get(url);
-
+print(json.decode(response.body)['jwt']);
     switch (response.statusCode) {
       case 200:
         return json.decode(response.body)['jwt'];
@@ -77,7 +77,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     );
 
     if (response.statusCode == 200) {
-      print(json.decode(response.body)['jwt']);
       return json.decode(response.body)['jwt'];
     } else {
       throw ServerException();
@@ -94,10 +93,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         body: body);
 
     if (response.statusCode == 200) {
-      print(response.body);
-      print("oooooooooooooooooooooo");
-      UserModel user = UserModel.fromJson(json.decode(response.body));
-      print(UserModel.fromJson(json.decode(response.body)));
       return UserModel.fromJson(json.decode(response.body));
     } else {
       throw ServerException();
