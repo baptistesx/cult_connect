@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
           headline1: TextStyle(
               fontSize: 40.0,
               fontWeight: FontWeight.w900,
-              fontStyle: FontStyle.italic,
+              fontStyle: FontStyle.italic,  
               color: const Color(0xFF274344)),
           headline2: TextStyle(
               fontSize: 30.0,

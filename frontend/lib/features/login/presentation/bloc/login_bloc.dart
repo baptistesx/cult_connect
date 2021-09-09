@@ -105,7 +105,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           yield* verificationCode.fold(
             (failure) async* {
               yield LoginEmpty();
-              yield LoginError(
+              yield LoginError(_mapFailureToMessage(failure)
                 message: _mapFailureToMessage(failure),
               );
             },
